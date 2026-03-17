@@ -1,0 +1,42 @@
+import type { PropType } from 'vue';
+
+export const footerProps = {
+  confirmLoading: { type: Boolean },
+  showCancelBtn: { type: Boolean, default: true },
+  cancelButtonProps: Object as PropType<Recordable>,
+  cancelText: { type: String, default: '取消' },
+  showOkBtn: { type: Boolean, default: true },
+  okButtonProps: Object as PropType<Recordable>,
+  okText: { type: String, default: '确定' },
+  okType: { type: String, default: 'primary' },
+  showFooter: { type: Boolean },
+  footerHeight: {
+    type: [String, Number] as PropType<string | number>,
+    default: 60,
+  },
+};
+export const basicProps = {
+  isDetail: { type: Boolean },
+  title: { type: String, default: '' },
+  loading: { type: Boolean },
+  visibleRef: { type: Boolean },
+  showDetailBack: { type: Boolean, default: true },
+  showDetailClose: { type: Boolean, default: true },
+  destroyOnClose: { type: Boolean },
+  maskClosable: { type: Boolean, default: true },
+  closable: { type: Boolean, default: true },
+  fullscreen: { type: Boolean },
+  getContainer: { type: [String, Object, Function] as PropType<any> },
+  closeIcon: { type: Object as PropType<any> },
+  autofocus: { type: Boolean, default: true },
+  keyboard: { type: Boolean, default: true },
+  centered: { type: Boolean, default: false },
+  width: { type: [String, Number] as PropType<string | number>, default: 500 },
+  height: { type: [String, Number] as PropType<string | number>, default: '60%' },
+  zIndex: { type: Number },
+  bodyStyle: { type: Object as PropType<any> },
+  wrapClassName: { type: String },
+  drawerStyle: { type: Object as PropType<any> },
+  headerStyle: { type: Object as PropType<any> },
+  contentStyle: { type: Object as PropType<any> },
+};
