@@ -15,7 +15,7 @@ export const layoutMultipleHeadePlaceholderTime = 0.6;
 
 // app theme preset color
 export const APP_PRESET_COLOR_LIST: string[] = [
-  '#0960bd',
+  '#006be6',
   '#0084f4',
   '#009688',
   '#536dfe',
