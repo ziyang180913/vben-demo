@@ -7,7 +7,8 @@
     @menu-event="handleMenuEvent"
   >
     <div :class="`${prefixCls}__info`" @contextmenu="handleContext" v-if="getIsTabs">
-      <span class="ml-1">{{ getTitle }}</span>
+      <Icon style="margin-right: 0; font-size: 14px" v-if="getIcon" :icon="getIcon" />
+      <span :class="`${prefixCls}__title`">{{ getTitle }}</span>
     </div>
     <span :class="`${prefixCls}__extra-quick`" v-else @click="handleContext">
       <Icon icon="ion:chevron-down" />
@@ -42,6 +43,11 @@
   const getTitle = computed(() => {
     const { tabItem: { meta } = {} } = props;
     return meta && meta.title;
+  });
+
+  const getIcon = computed(() => {
+    const { tabItem: { meta } = {} } = props;
+    return meta && (meta.icon as string);
   });
 
   const getIsTabs = computed(() => !props.isExtra);

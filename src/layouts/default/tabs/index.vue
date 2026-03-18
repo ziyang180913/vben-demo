@@ -14,6 +14,24 @@
         <Tabs.TabPane :closable="!(item && item.meta && item.meta.affix)">
           <template #tab>
             <TabContent :tabItem="item" />
+            <!-- 只有选中时才显示背景 -->
+            <div class="tabs-chrome__background" v-if="item.path === activeKeyRef">
+              <div class="tabs-chrome__background_content"></div>
+              <svg
+                class="tabs-chrome__background-before absolute bottom-0 -left-px fill-transparent transition-all duration-150"
+                height="7"
+                width="7"
+              >
+                <path d="M 0 7 A 7 7 0 0 0 7 0 L 7 7 Z" />
+              </svg>
+              <svg
+                class="tabs-chrome__background-after absolute -right-px bottom-0 fill-transparent transition-all duration-150"
+                height="7"
+                width="7"
+              >
+                <path d="M 0 0 A 7 7 0 0 0 7 7 L 0 7 Z" />
+              </svg>
+            </div>
           </template>
         </Tabs.TabPane>
       </template>
@@ -53,9 +71,6 @@
   import { useMouse } from '@vueuse/core';
   import { multipleTabHeight } from '@/settings/designSetting';
 
-  import { useHeaderSetting } from '@/hooks/setting/useHeaderSetting';
-  import { useMenuSetting } from '@/hooks/setting/useMenuSetting';
-
   defineOptions({ name: 'MultipleTabs' });
 
   const affixTextList = initAffixTabs();
@@ -78,18 +93,8 @@
 
   const { y: mouseY } = useMouse();
 
-  const { getShowMenu } = useMenuSetting();
-  const { getShowHeader } = useHeaderSetting();
-  const getIsUnFold = computed(() => !unref(getShowMenu) && !unref(getShowHeader));
-
   const getWrapClass = computed(() => {
-    return [
-      prefixCls,
-      {
-        [`${prefixCls}--hide-close`]: unref(unClose),
-        [`${prefixCls}--hover`]: unref(mouseY) < multipleTabHeight,
-      },
-    ];
+    return [prefixCls, {}];
   });
 
   listenerRouteChange((route) => {
