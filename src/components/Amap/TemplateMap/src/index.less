@@ -1,0 +1,69 @@
+.template-map-component {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  .do-page-store-flow-boxswitch {
+    position: absolute;
+    border-radius: 4px;
+    width: 216px;
+    right: 20px;
+    top: 80px;
+    background-color: #fff;
+    .do-page-store-flow-box-switch-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 12px;
+      height: 40px;
+    }
+
+    .line {
+      height: 1px;
+    }
+  }
+  .amap-markers {
+    .amap-marker {
+      .amap-icon {
+        width: 24px !important;
+        height: 24px !important;
+        img {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      .amap-marker-label {
+        border: none;
+        background-color: rgba(70, 76, 91, 0.9);
+        color: #ffffff;
+        border-radius: 4px;
+      }
+    }
+  }
+  .amap-info {
+    .amap-info-sharp {
+      bottom: 1px;
+    }
+    .amap-info-content {
+      .info-nowrap {
+        white-space: nowrap;
+      }
+    }
+  }
+  .amap-info-content {
+    padding: 5px !important;
+  }
+  .amap-info-outer-operate {
+    padding: 7px !important;
+    display: flex;
+    .amap-info-outer-operate-clear {
+      color: #fc5c27;
+    }
+    .amap-info-outer-operate-ok {
+      margin-left: 16px;
+      color: #4ecb75;
+    }
+  }
+  .amap-info-close {
+    display: none;
+  }
+}

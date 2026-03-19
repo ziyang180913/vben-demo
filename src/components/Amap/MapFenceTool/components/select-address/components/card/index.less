@@ -1,0 +1,76 @@
+.select-address-urban-street {
+  .ant-input-prefix {
+    color: rgb(2 4 13 / 25%);
+  }
+
+  .select-address-urban-street-card {
+    .select-address-urban-street-card-current {
+      margin-top: 15px;
+      padding: 5px 10px;
+      border-bottom: 1px solid rgb(2 4 13 / 12%);
+      color: #5392f7;
+      font-size: 14px;
+
+      .select-address-urban-street-card-current-title {
+        display: flex;
+
+        .title-color {
+          display: inline-block;
+          width: 70px;
+          overflow: hidden;
+          color: rgb(2 4 13 / 65%);
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        span {
+          display: inline-block;
+          margin-left: 20px;
+          cursor: pointer;
+
+          &:hover {
+            color: #5392f7;
+          }
+        }
+      }
+    }
+
+    .select-address-urban-street-card-list {
+      max-height: 125px;
+      padding: 15px 5px 0;
+      overflow: auto;
+
+      ul {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 0;
+        padding: 0;
+
+        li {
+          flex: 0 0 25%;
+          height: 35px;
+          overflow: hidden;
+
+          .color-4d6aff {
+            color: #5392f7;
+          }
+
+          span {
+            display: inline-block;
+            width: 100%;
+            padding: 0 0.1rem;
+            overflow: hidden;
+            text-align: center;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+
+            &:hover {
+              color: #5392f7;
+            }
+          }
+        }
+      }
+    }
+  }
+}

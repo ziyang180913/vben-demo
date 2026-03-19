@@ -1,0 +1,62 @@
+.do-map-constor {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+
+  .constor-item-box {
+    display: flex;
+    height: 40px;
+    padding: 0 8px;
+    border-radius: 4px;
+    background-color: #fff;
+
+    .constor-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 32px;
+      padding-right: 12px;
+      color: #5392f7;
+      cursor: pointer;
+      user-select: none;
+
+      img {
+        width: 25px;
+        height: 25px;
+      }
+    }
+
+    .constor-item-btn {
+      margin-right: 15px;
+    }
+  }
+
+  .line {
+    width: 1px;
+    height: 20px;
+    margin: 10px 4px 0;
+  }
+  // 生成item选中的样式
+  .active {
+    background: rgb(77 106 255 / 8%) !important;
+  }
+
+  .do-map-constor-icon {
+    height: 32px !important;
+
+    .constor-item {
+      padding-right: 0 !important;
+      transition: 0.3s;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+    }
+
+    .address-box {
+      top: 38px;
+      left: 0;
+    }
+  }
+}

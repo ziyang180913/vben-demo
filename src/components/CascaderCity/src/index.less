@@ -1,0 +1,112 @@
+.other-cascader-city {
+  position: relative;
+
+  .other-cascader-city-modal {
+    position: absolute;
+    z-index: 5;
+    top: 32px;
+    left: -12px;
+    width: 273px;
+    overflow: hidden;
+    transition: 0.4s;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 3px 6px 0 rgb(2 4 13 / 20%);
+
+    .other-cascader-city-select-address-urban-street {
+      padding: 20px 10px 0;
+
+      .ant-input-prefix {
+        color: rgb(2 4 13 / 25%);
+      }
+
+      .other-cascader-city-select-address-urban-street-card {
+        .other-cascader-city-select-address-urban-street-card-current {
+          padding: 5px 10px;
+          border-bottom: 1px solid rgb(2 4 13 / 12%);
+          // margin-top: 15px;
+          font-size: 14px;
+
+          .other-cascader-city-select-address-urban-street-card-current-title {
+            display: flex;
+
+            .title-color {
+              display: inline-block;
+              width: 70px;
+              margin-left: 0;
+              overflow: hidden;
+              color: rgb(2 4 13 / 65%);
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            span {
+              display: inline-block;
+              cursor: pointer;
+              // margin-left: 20px;
+              &:hover {
+                color: #5392f7;
+              }
+            }
+          }
+        }
+
+        .other-cascader-city-select-address-urban-street-card-list {
+          max-height: 225px;
+          padding: 15px 5px 0;
+          overflow: auto;
+
+          ul {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 0;
+            padding: 0;
+
+            li {
+              flex: 0 0 33.3%;
+              height: 35px;
+              overflow: hidden;
+              color: rgb(2 4 13 / 85%);
+
+              .color-4d6aff {
+                color: #5392f7;
+              }
+
+              span {
+                display: inline-block;
+                width: 100%;
+                padding: 0 0.1rem;
+                overflow: hidden;
+                text-align: center;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                cursor: pointer;
+
+                &:hover {
+                  color: #5392f7;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .ant-select-arrow {
+        display: none;
+      }
+    }
+
+    .other-cascader-city-btn {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background-color: #fff;
+
+      .ant-btn {
+        width: 50%;
+        height: 40px;
+        border-radius: 0 !important;
+      }
+    }
+  }
+}

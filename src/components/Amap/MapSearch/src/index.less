@@ -1,0 +1,110 @@
+.map-search-component {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  .box-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 12px;
+    box-shadow: 0px 3px 6px 0px rgba(2, 4, 13, 0.2);
+    border-radius: 4px;
+    height: 32px;
+    background: #ffffff;
+
+    .ant-input,
+    .ant-input-affix-wrapper {
+      border: none !important;
+    }
+    .ant-input-affix-wrapper-focus {
+      box-shadow: none !important;
+    }
+    .ant-input-outlined {
+      &:focus-within {
+        box-shadow: none !important;
+      }
+    }
+
+    .city {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-right: 12px;
+      cursor: pointer;
+      user-select: none;
+
+      .city-name {
+        width: 56px;
+        font-size: 14px;
+        color: rgba(0, 11, 54, 0.65);
+        line-height: 20px;
+        text-align: center;
+        // 超出 3 个字显示省略号
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .city-arrow {
+        margin-left: 4px;
+        width: 12px;
+        height: 12px;
+      }
+      // 用 after 做竖线 间隔
+      &:before {
+        position: absolute;
+        right: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        content: '';
+        display: inline-block;
+        width: 1px;
+        height: 12px;
+        background: rgba(0, 11, 54, 0.12);
+      }
+    }
+
+    .search {
+      margin-left: 12px;
+      display: flex;
+      align-items: center;
+
+      .search-icon {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+
+  .box-search-active {
+    border-radius: 4px 4px 0 0 !important;
+  }
+  .search-content {
+    position: absolute;
+    z-index: 10;
+    padding: 4px 0;
+    top: 36px;
+    width: 100%;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background-color: #fff;
+    // 向下阴影
+    box-shadow: 0 10px 8px 0 rgba(0, 0, 0, 0.15);
+    min-height: 60px;
+    .content-item {
+      cursor: pointer;
+      padding: 4px 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+  }
+  .font-12-left-400-pr45 {
+    font-size: 12px;
+    text-align: left;
+    font-weight: 400;
+    color: rgba(2, 4, 13, 0.45);
+  }
+}
