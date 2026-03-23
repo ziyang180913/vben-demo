@@ -1,6 +1,11 @@
 import { defHttp } from '@/utils/http/axios';
 import qs from 'qs';
 
+enum Api {
+  Category = '/api/common/categroy_tree',
+  BrandSearch = '/api/common/brand/search',
+}
+
 /**
  * 获取可达圈
  * @param params objct 查询参数
@@ -12,4 +17,20 @@ export function getReachable(params: object) {
     if (!response.ok) throw new Error('Network error');
     return response.json(); // 解析 JSON
   });
+}
+
+/**
+ * 获取业态
+ * @param params objct 查询参数
+ */
+export function getCategories() {
+  return defHttp.get<any>({ url: Api.Category }, { errorMessageMode: 'none' });
+}
+
+/**
+ * 获取品牌
+ * @param params objct 查询参数
+ */
+export function getBrandSearch(params: object) {
+  return defHttp.get<any>({ url: Api.BrandSearch, params }, { errorMessageMode: 'none' });
 }

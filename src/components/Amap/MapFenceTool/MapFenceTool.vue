@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
   import { message, Button, Tooltip } from 'ant-design-vue';
-  import { convertBD09ToGCJ02, convertWGS84ToGCJ02 } from '@/utils/gcoord';
+  import { convertBD09ToGCJ02, convertWGS84ToGCJ02 } from '@/utils/aMap/gcoord';
   import { ref, computed, watch, onMounted, onUnmounted, shallowRef, markRaw } from 'vue';
   import { getReachable } from '@/api/global';
   import content from './tips-content';

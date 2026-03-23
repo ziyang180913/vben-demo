@@ -9,7 +9,7 @@ const basicData: AppRouteModule = {
   component: LAYOUT,
   redirect: '/basicdata/grid',
   meta: {
-    icon: 'ion:grid-outline',
+    icon: 'ion:bar-chart-outline',
     title: '基础数据平台',
   },
   children: [

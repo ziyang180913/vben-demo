@@ -49,17 +49,16 @@ const transform: AxiosTransform = {
       throw new Error('请求失败，请稍后重试！');
     }
     //  这里 code，result，message为 后台统一的字段，需要在 types.ts内修改为项目自己的接口返回格式
-    const { code, result, message } = data;
-
+    const { code, data: result, message } = data;
     // 这里逻辑可以根据项目进行修改
-    const hasSuccess = data && Reflect.has(data, 'code') && code === ResultEnum.SUCCESS;
+    const hasSuccess =
+      data && Reflect.has(data, 'code') && (code === ResultEnum.SUCCESS || code === 0);
     if (hasSuccess) {
       let successMsg = message;
 
       if (isNull(successMsg) || isUndefined(successMsg) || isEmpty(successMsg)) {
         successMsg = '操作成功！';
       }
-
       if (options.successMessageMode === 'modal') {
         createSuccessModal({ title: '成功提示', content: successMsg });
       } else if (options.successMessageMode === 'message') {
@@ -156,9 +155,9 @@ const transform: AxiosTransform = {
     const token = getToken();
     if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
       // jwt token
-      (config as Recordable).headers.Authorization = options.authenticationScheme
-        ? `${options.authenticationScheme} ${token}`
-        : token;
+      (config as Recordable).headers.Authorization = `Bearer ${
+        options.authenticationScheme ? `${options.authenticationScheme} ${token}` : token
+      }`;
     }
     return config;
   },

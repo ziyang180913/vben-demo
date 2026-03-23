@@ -38,7 +38,7 @@
   // import { getFencesfind } from '@/api/global';
   import Card from './components/card/index.vue';
   import { buildUUID } from '@/utils/uuid';
-  import { convertBD09ToGCJ02 } from '@/utils/gcoord';
+  import { convertBD09ToGCJ02 } from '@/utils/aMap/gcoord';
   import './index.less';
 
   // 定义选项类型
