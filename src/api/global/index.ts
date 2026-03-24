@@ -4,6 +4,7 @@ import qs from 'qs';
 enum Api {
   Category = '/api/common/categroy_tree',
   BrandSearch = '/api/common/brand/search',
+  SceneSearch = '/api/citymap/scene',
 }
 
 /**
@@ -25,6 +26,14 @@ export function getReachable(params: object) {
  */
 export function getCategories() {
   return defHttp.get<any>({ url: Api.Category }, { errorMessageMode: 'none' });
+}
+
+/**
+ * 获取业态/品牌详情
+ * @param params objct 查询参数
+ */
+export function getSceneSearch(params: object) {
+  return defHttp.post<any>({ url: Api.SceneSearch, params }, { errorMessageMode: 'none' });
 }
 
 /**

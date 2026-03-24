@@ -78,20 +78,3 @@ export const poiLabelSuffix = [
     color: '#D5ED9D',
   },
 ];
-
-// 获取每个分类对应ids
-export const getKeyRelateIds = () => {
-  const map = {};
-  try {
-    poiLabelSuffix.forEach((_item) => {
-      _item.suffixList.forEach((_suffix) => {
-        _suffix.ids.forEach((_id) => {
-          map[_id] = _suffix.label;
-        });
-      });
-    });
-  } catch (e) {
-    console.error(e);
-  }
-  return map;
-};

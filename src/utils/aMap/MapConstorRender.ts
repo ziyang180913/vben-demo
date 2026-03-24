@@ -21,15 +21,15 @@ type Callback = (data: any) => void;
 // 围栏扩展
 class MapConstorRender {
   private map: AMap.Map;
-  private labelsLayer: AMap.OverlayGroup;
+  private overlayGroup: AMap.OverlayGroup;
   private options: any;
 
   constructor(map: AMap.Map, options: any = {}) {
     this.map = map;
     // labels 图层
-    this.labelsLayer = new window.AMap.OverlayGroup(); // 群组围栏
+    this.overlayGroup = new window.AMap.OverlayGroup(); // 群组围栏
     this.options = options;
-    this.map.add(this.labelsLayer);
+    this.map.add(this.overlayGroup);
   }
 
   // 创建围栏
@@ -38,7 +38,6 @@ class MapConstorRender {
       const circleItem = item as CircleItem;
       const marker = new AMap.Marker({
         position: [circleItem.lng, circleItem.lat],
-        // @ts-expect-error
         size: new AMap.Size(28, 28),
         offset: new AMap.Pixel(2, 0),
         anchor: 'center',
@@ -60,12 +59,10 @@ class MapConstorRender {
       marker.on('click', () => {
         callback && callback(item);
       });
-      this.labelsLayer.addOverlays([marker, circle]);
+      this.overlayGroup.addOverlays([marker, circle]);
       return;
     } else if (type === 'polygon') {
       const polygonItem = item as PolygonItem;
-      // 围栏参数
-      // @ts-expect-error
       const polyline: AMap.PolygonOptions = {
         path: polygonItem.path,
         extData: polygonItem,
@@ -82,37 +79,25 @@ class MapConstorRender {
       polylines.on('click', () => {
         callback && callback(polylines.getExtData());
       });
-      this.labelsLayer.addOverlays([polylines]);
+      this.overlayGroup.addOverlays([polylines]);
       return;
     }
   }
 
-  // 获取绘制的多边形参数二维数组
-  getPolygon(): void {
-    const LngLat = this.labelsLayer.getOverlays()?.length
-      ? this.labelsLayer.getOverlays()?.length === 2
-        ? this.labelsLayer
-            .getOverlays()?.[1]
-            ?.getPath()
-            ?.map((item) => [item.lng, item.lat])
-        : this.labelsLayer
-            .getOverlays()?.[0]
-            ?.getPath()
-            ?.map((item) => [item.lng, item.lat])
-      : undefined;
-    return this.labelsLayer.getOverlays()?.length === 1 ? [...LngLat, LngLat[0]] : LngLat;
-  }
-
   // 清除围栏
   clear(): void {
-    this.labelsLayer?.clearOverlays();
+    this.overlayGroup?.clearOverlays();
   }
 
   // 销毁画布
   destroy(): void {
-    if (this.labelsLayer) {
-      this.labelsLayer?.clearOverlays();
-      this.labelsLayer = null as unknown as AMap.OverlayGroup;
+    try {
+      if (this.overlayGroup) {
+        this.overlayGroup?.clearOverlays();
+        this.overlayGroup = null as unknown as AMap.OverlayGroup;
+      }
+    } catch (error) {
+      console.error('销毁地图围栏图层时出错:', error);
     }
   }
 }

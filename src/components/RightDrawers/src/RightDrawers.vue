@@ -20,6 +20,7 @@
           </div>
           <div v-if="desc" class="right-drawers-table-title-info">{{ desc }}</div>
           <div class="table-title-float-right">
+            <span v-if="feedBackInfo" class="btn" @click="emit('feedback')"> 反馈 </span>
             <div v-if="feedBackInfo && hasExport" class="line"></div>
             <span v-if="hasExport" class="btn" @click="emit('export')"> 导出 </span>
           </div>
@@ -45,7 +46,7 @@
     style: Object,
   });
 
-  const emit = defineEmits(['open', 'export']);
+  const emit = defineEmits(['open', 'export', 'feedback']);
 
   const attrs = useAttrs();
   const hasExport = computed(() => !!attrs.onExport);

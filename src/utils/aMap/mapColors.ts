@@ -1,4 +1,4 @@
-import utils from '@/utils/map-icon';
+import utils from './icons';
 
 // 网格颜色
 export const GRID_COLORS = [

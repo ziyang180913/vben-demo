@@ -41,7 +41,8 @@ interface PoiMarkerOptions {
 class PoiLayerManager {
   private map: AMap.Map;
   private labelsLayer: AMap.LabelsLayer | null = null;
-  private polygonMap: Map<string | number, AMap.Polygon> = new Map();
+  // 群组围栏
+  private overlayGroup: AMap.OverlayGroup | null = null;
   private tooltipMarker: AMap.Marker;
 
   private data: PoiData[] = [];
@@ -96,13 +97,16 @@ class PoiLayerManager {
    * 初始化图层
    */
   public init(): void {
+    // 初始化 LabelsLayer 用于渲染文字标签
     this.labelsLayer = new AMap.LabelsLayer({
-      zIndex: 200,
+      zIndex: 1000,
       collision: this.options.collision,
       allowCollision: this.options.allowCollision,
     });
-
+    // labels 图层
+    this.overlayGroup = new window.AMap.OverlayGroup(); // 群组围栏
     this.map.add(this.labelsLayer as any);
+    this.map.add(this.overlayGroup);
     this.map.on('moveend', this.debouncedMoveEnd);
     this.map.on('zoomend', this.debouncedMoveEnd);
   }
@@ -129,21 +133,17 @@ class PoiLayerManager {
    * 核心渲染逻辑 (包含点位与围栏)
    */
   private renderAll(): void {
-    if (!this.labelsLayer) return;
-
+    if (!this.labelsLayer || !this.overlayGroup) return;
     // 1. 清理现有图层
     this.labelsLayer.clear();
     this.clearPolygons();
-
     const bounds = this.map.getBounds();
     const labelMarkers: AMap.LabelMarker[] = [];
-
+    const polygonMarkers: AMap.Polygon[] = [];
     this.data.forEach((item) => {
       // 性能优化：只渲染视口内的元素（围栏若大可适当放宽边界）
       if (!bounds.contains(item.location)) return;
-
       const isSelected = this.checkIsSelected(item);
-
       // 2. 渲染围栏 (Polygon)
       if (item.path && item.path.length > 0) {
         const polygon = new AMap.Polygon({
@@ -161,25 +161,24 @@ class PoiLayerManager {
         if (this.options.isClickable) {
           polygon.on('click', () => this.selectPosition(item.location, item));
         }
-
-        this.map.add(polygon);
-        this.polygonMap.set(item.id, polygon);
+        polygonMarkers.push(polygon);
+        // this.map.add(polygon);
+        // this.polygonMap.set(item.id, polygon);
       }
 
       // 3. 渲染点位 (LabelMarker)
       const marker = this.createLabelMarker(item, isSelected);
       labelMarkers.push(marker);
     });
-
     this.labelsLayer.add(labelMarkers);
+    this.overlayGroup.addOverlays(polygonMarkers);
   }
 
   /**
    * 创建点位实例
    */
   private createLabelMarker(item: PoiData, isSelected: boolean): AMap.LabelMarker {
-    const marker = new AMap.LabelMarker({
-      name: item.name,
+    const markerOptions: any = {
       position: item.location,
       zIndex: isSelected ? 999 : item.zIndex || 1,
       extData: item,
@@ -190,8 +189,11 @@ class PoiLayerManager {
         size: this.options.iconSize,
         anchor: 'center',
       },
-      text: {
-        content: this.isInfoStatus ? ` ${item.name} ` : '',
+    };
+
+    if (this.isInfoStatus && item.name) {
+      markerOptions.text = {
+        content: ` ${item.name} `,
         direction: 'bottom',
         style: isSelected
           ? this.options.currentColor.style
@@ -204,8 +206,10 @@ class PoiLayerManager {
               borderColor: '#fff',
               borderWidth: 1,
             },
-      },
-    });
+      };
+    }
+
+    const marker = new AMap.LabelMarker(markerOptions);
 
     // 事件绑定
     marker.on('mouseover', () => {
@@ -261,19 +265,28 @@ class PoiLayerManager {
 
   private getTooltipHTML(props: PoiData): string {
     return `
-      <div style="background: rgba(0,0,0,0.75); color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 12px; line-height: 1.6;">
-        <div style="font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">
-          ${props.name}
+     <div style="background: #fff; color: rgba(0,0,0,0.75); padding: 8px 12px; border-radius: 4px; font-size: 12px; line-height: 1.6; min-width: 120px;">
+        <div style="font-weight: bold; margin-bottom: 4px; border-bottom: 1px solid rgba(0,0,0,0.1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${props.name}
         </div>
-        <div>场景ID：${props.id || '暂无'}</div>
-        ${props.extraShow ? `<div>备注：${props.extraShow}</div>` : ''}
-      </div>
+        
+        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            场景ID：${props.id || '暂无'}
+        </div>
+        
+        ${props.extraShow ? `<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">备注：${props.extraShow}</div>` : ''}
+    </div>
     `;
   }
 
   private clearPolygons(): void {
-    this.polygonMap.forEach((poly) => this.map.remove(poly));
-    this.polygonMap.clear();
+    try {
+      if (this.overlayGroup) {
+        this.overlayGroup.clearOverlays();
+      }
+    } catch (error) {
+      console.error('清除围栏时出错:', error);
+    }
   }
 
   public clearLayer(): void {
@@ -291,6 +304,14 @@ class PoiLayerManager {
     if (this.labelsLayer) {
       this.map.remove(this.labelsLayer as any);
       this.labelsLayer = null;
+    }
+    if (this.overlayGroup) {
+      try {
+        this.map.remove(this.overlayGroup as any);
+        this.overlayGroup = null;
+      } catch (error) {
+        console.error('清除围栏群组时出错:', error);
+      }
     }
     this.map.remove(this.tooltipMarker);
   }

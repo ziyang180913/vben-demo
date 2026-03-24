@@ -2,9 +2,7 @@
  * MapVisualizationManager.ts
  * 融合了 Loca GPU 加速渲染与 Canvas/LabelsLayer 高性能文字方案
  */
-import MapMarkerFences from './PoiLayerManager';
-import MapConstorRender from './MapConstorRender';
-import { GRID_COLORS, MARKER_CURRENT_COLOR } from './mapColors';
+import { GRID_COLORS } from './mapColors';
 
 // --- 类型定义 ---
 
@@ -33,8 +31,6 @@ export class MapVisualizationManager {
   private loca: any; // Loca.Container
   private visualLayer: any | null = null; // 热力或网格图层 (Loca)
   private labelLayer: AMap.LabelsLayer | null = null; // 高性能文字图层
-  private fenceRenderer: MapConstorRender;
-  private markerFenceManager: MapMarkerFences | null = null;
 
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -43,22 +39,10 @@ export class MapVisualizationManager {
     // 1. 初始化 Loca 容器 (GPU 加速核心)
     this.loca = new (window as any).Loca.Container({ map });
 
-    // 2. 初始化围栏渲染
-    this.fenceRenderer = new MapConstorRender(map, {
-      fillColor: MARKER_CURRENT_COLOR,
-      strokeColor: MARKER_CURRENT_COLOR,
-      fillOpacity: 0,
-    });
-
     this.initPlugins();
   }
 
-  private initPlugins() {
-    if (this.map) {
-      this.markerFenceManager = new MapMarkerFences(this.map, {});
-      this.markerFenceManager.init();
-    }
-  }
+  private initPlugins() {}
 
   // ==================== 热力图模块 (Loca 驱动) ====================
 
@@ -68,7 +52,6 @@ export class MapVisualizationManager {
   public async createHeatMap(data: MapDataItem[], radius = 20, maxThreshold?: number) {
     this.clearVisualLayers();
     if (!data.length) return;
-
     this.visualLayer = new (window as any).Loca.HeatMapLayer({
       zIndex: 10,
       opacity: 1,
@@ -176,25 +159,21 @@ export class MapVisualizationManager {
         collision: true, // 开启碰撞检测，防止文字重叠
         allowCollision: false,
       });
-
-      const mapBounds = this.map.getBounds();
       const markers: AMap.LabelMarker[] = [];
 
       for (let i = 0; i < labels.length; i++) {
         const item = labels[i];
         // 【性能优化：视口剔除】只创建当前屏幕可见范围内的 Label
-        if (mapBounds.contains(new AMap.LngLat(item.center[0], item.center[1]))) {
-          markers.push(
-            new AMap.LabelMarker({
-              position: item.center,
-              text: {
-                content: String(item.count),
-                direction: 'center',
-                style: { fontSize: 11, fillColor: '#fff', strokeWidth: 0 },
-              },
-            }),
-          );
-        }
+        markers.push(
+          new AMap.LabelMarker({
+            position: item.center,
+            text: {
+              content: String(item.count),
+              direction: 'center',
+              style: { fontSize: 11, fillColor: '#fff', strokeWidth: 0 },
+            },
+          }),
+        );
       }
 
       this.labelLayer.add(markers);
@@ -228,7 +207,7 @@ export class MapVisualizationManager {
       this.visualLayer = null;
     }
     if (this.labelLayer) {
-      this.labelLayer.clearOverlays();
+      this.labelLayer.destroy();
       this.map?.remove(this.labelLayer);
       this.labelLayer = null;
     }
@@ -240,14 +219,6 @@ export class MapVisualizationManager {
    */
   public destroy() {
     this.clearVisualLayers();
-    this.fenceRenderer?.destroy();
-    this.markerFenceManager?.destroy();
     this.loca?.destroy();
-
-    if (this.map) {
-      this.map.clearMap();
-      this.map.destroy();
-      this.map = null;
-    }
   }
 }
