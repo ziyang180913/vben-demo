@@ -77,6 +77,7 @@
   import markerIcon from '@/assets/mapImg/marker.png';
   import eraserIcon from '@/assets/mapImg/eraser.png';
   import ruleIcon from '@/assets/mapImg/distance@2x.png';
+  import { throttle } from 'lodash-es'; // 建议引入 lodash
 
   declare const AMap: any;
 
@@ -241,6 +242,7 @@
   };
 
   const clearAllOverlay = () => {
+    props.map.clearEvents('mousemove');
     overlayLayer.value?.clearOverlays();
     selectAddressOpen.value = false;
     props.clearCover?.();
@@ -276,6 +278,7 @@
       params = [
         new AMap.Polygon({
           path: data.path.map((v: [number, number]) => new AMap.LngLat(v[0], v[1])),
+          extData: option,
           ...drawStyle,
         }),
       ];
@@ -292,7 +295,8 @@
     const key = type === 'circle' ? '圆' : '围栏';
     createArea(data?.path, key, data?.area, data);
     if (isFence(data?.path, data?.area)) {
-      addOverlay(data, type, option);
+      // 调用 addOverlay 时，内部生成的覆盖物需要打标
+      addOverlay(data, type, { ...option, isFinished: true });
       if (props.callback && !props.isOk) {
         props.callback(data, type);
       }
@@ -384,7 +388,7 @@
         props.map.setDefaultCursor('pointer');
         if (props.callback && !props.isOk) {
           props.callback(null, 'clear');
-          // clearAllOverlay();
+          clearAllOverlay();
         }
         // props.clearCover?.();
         clearAllOverlay();
@@ -660,6 +664,7 @@
       if (data.type === 'ok') {
         const key = Object.keys(data).at(-1)!;
         props.callback?.(Object.values(data).at(-1), key);
+        props.map.clearInfoWindow();
       } else {
         props.map.clearInfoWindow();
         message.success('已取消！');
@@ -669,7 +674,7 @@
     });
   };
 
-  const setupMapMouseEvents = () => {
+  const setupMapMouseEvents = throttle(() => {
     props.map.clearEvents('mousemove');
     if (current.value === 'circle') {
       leftMarker.value?.show();
@@ -690,10 +695,10 @@
           leftMarker.value.setPosition(e.lnglat);
         }
       });
-    } else {
+    } else if (current.value === 'polygon') {
       leftMarker.value?.hide();
       props.map.on('mousemove', (e: any) => {
-        const currentEle = e.target.getAllOverlays(current.value)?.at(0);
+        const currentEle = e.target.getAllOverlays(current.value)?.at(-1);
         const extData = currentEle?.getExtData() || {};
 
         if (!Object.keys(extData).length && currentEle?.getPath) {
@@ -713,7 +718,7 @@
         }
       });
     }
-  };
+  }, 100);
 
   const setSelectPoints = (points: Partial<SelectPointsState>) => {
     selectPoints.value = { ...selectPoints.value, ...points };
@@ -727,7 +732,7 @@
   });
 
   onUnmounted(() => {
-    // clearAllOverlay()
+    clearAllOverlay();
     drawInstance.value?.close(true);
     props.map?.clearEvents('mousemove');
     props.map?.off('mousemove', () => {});
