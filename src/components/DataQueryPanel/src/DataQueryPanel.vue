@@ -116,46 +116,10 @@
                 <span class="poi-label">其他POI</span>
               </div>
 
-              <div class="other-poi-box">
-                <Radio.Group v-model:value="internalFormData.poi.otherPoiType" class="radio-group">
-                  <Radio value="category">业态</Radio>
-                  <Radio value="brand">品牌</Radio>
-                </Radio.Group>
-                <span class="divider">|</span>
-
-                <Cascader
-                  v-if="internalFormData.poi.otherPoiType === 'category'"
-                  v-model:value="internalFormData.poi.otherPoiValue"
-                  :options="formatOptions"
-                  :fieldNames="{ label: 'name', value: 'id', children: 'children' }"
-                  multiple
-                  max-tag-count="responsive"
-                  placeholder="请选择业态"
-                  :bordered="false"
-                  class="other-input flex-1"
-                  :showCheckedStrategy="Cascader.SHOW_CHILD"
-                  allowClear
-                  @change="onCascaderChange"
-                />
-
-                <Select
-                  v-else
-                  v-model:value="internalFormData.poi.otherBrandDetails"
-                  mode="multiple"
-                  label-in-value
-                  :options="brandOptions"
-                  placeholder="请输入或选择品牌"
-                  :bordered="false"
-                  class="other-input flex-1"
-                  :default-active-first-option="false"
-                  :show-arrow="false"
-                  :filter-option="false"
-                  :not-found-content="null"
-                  @search="searchBrand"
-                  max-tag-count="responsive"
-                  allowClear
-                />
-              </div>
+              <PoiBusinessSelector
+                v-model:type="internalFormData.poi.otherPoiType"
+                v-model:value="currentPoiDetails"
+              />
             </div>
           </div>
         </div>
@@ -173,11 +137,10 @@
   import { UpOutlined, DownOutlined } from '@ant-design/icons-vue';
   import { populationOptions, gridSizeOptions, poiLabelSuffix } from './config';
   import { useCategroyStore } from '@/store/modules/business';
-  import { getBrandSearch } from '@/api/global';
-  import { debounce } from 'lodash-es';
   import type { Dayjs } from 'dayjs';
   import dayjs from 'dayjs';
   import quarterOfYear from 'dayjs/plugin/quarterOfYear';
+  import { PoiBusinessSelector } from '@/components/PoiBusinessSelector';
 
   dayjs.extend(quarterOfYear);
   const categroyStore = useCategroyStore();
@@ -297,27 +260,21 @@
     }
   };
 
-  // 搜索品牌
-  const searchBrand = debounce(async (value: string) => {
-    if (!value) return;
-    const res = await getBrandSearch({ keyword: value });
-    brandOptions.value = res.items.map((item: any) => ({
-      label: item.name,
-      value: item.id,
-    }));
-  }, 500);
-
-  // 处理 Cascader 变化，手动收集选中的 label
-  const onCascaderChange = (_value: any, selectedOptions: any[][]) => {
-    // selectedOptions 结构为多维数组，每一项代表选中的路径
-    internalFormData.poi.otherCategoryDetails = selectedOptions.map((path) => {
-      const target = path[path.length - 1]; // 取叶子节点
-      return {
-        label: target.name,
-        value: target.id,
-      };
-    });
-  };
+  // 使用计算属性来中转 internalFormData 中的数据，保持逻辑清晰
+  const currentPoiDetails = computed({
+    get: () => {
+      return internalFormData.poi.otherPoiType === 'category'
+        ? internalFormData.poi.otherCategoryDetails
+        : internalFormData.poi.otherBrandDetails;
+    },
+    set: (val) => {
+      if (internalFormData.poi.otherPoiType === 'category') {
+        internalFormData.poi.otherCategoryDetails = val;
+      } else {
+        internalFormData.poi.otherBrandDetails = val;
+      }
+    },
+  });
 
   const togglePanel = () => {
     internalOpen.value = !internalOpen.value;
@@ -344,12 +301,6 @@
 
   // 最终提交逻辑
   const handleAnalyze = () => {
-    // 根据当前选中的类型提取结果
-    const otherPoiResult =
-      internalFormData.poi.otherPoiType === 'category'
-        ? internalFormData.poi.otherCategoryDetails
-        : internalFormData.poi.otherBrandDetails;
-
     const payload = {
       ...internalFormData.population,
       month: internalFormData.population.month
@@ -359,7 +310,7 @@
         selectedTypes: internalFormData.poi.selectedTypes || [],
         baseInfo: internalFormData.poi.baseInfo,
         otherPoiType: internalFormData.poi.otherPoiType,
-        otherPoiDetails: otherPoiResult, // 统一返回 [{label, value}, ...]
+        otherPoiDetails: currentPoiDetails.value,
       },
     };
 

@@ -1,0 +1,83 @@
+.brand-selection-table-item.active {
+  background-color: rgba(0, 11, 54, 0.04);
+}
+
+.brand-selection-table-item {
+  padding: 16px;
+  border-bottom: 1px solid rgba(2, 4, 13, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(0, 11, 54, 0.04);
+  }
+
+  .hotel-info {
+    display: flex;
+    align-items: center;
+
+    .hotel-index,
+    .hotel-name {
+      color: rgba(0, 11, 54, 0.85);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .hotel-name {
+      margin-left: 4px;
+    }
+  }
+
+  .brand-name {
+    color: rgba(190, 95, 55, 1);
+    font-size: 14px;
+  }
+
+  .brand-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+
+    img {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .hotel-details {
+    background-color: rgba(0, 11, 54, 0.04);
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+
+    .detail-line {
+      width: 1px;
+      height: 34px;
+      background-color: rgba(0, 11, 54, 0.12);
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .detail-label {
+        color: rgba(0, 11, 54, 0.45);
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+
+      .detail-value {
+        color: rgba(0, 11, 54, 0.85);
+        font-weight: 500;
+        font-size: 14px;
+      }
+    }
+  }
+}

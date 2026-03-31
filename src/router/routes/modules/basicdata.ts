@@ -38,6 +38,14 @@ const basicData: AppRouteModule = {
             title: '产业分布',
           },
         },
+        {
+          path: '/basicdata/grid/traveler',
+          name: 'Traveler',
+          component: () => import('@/views/basicdata/grid/traveler/index.vue'),
+          meta: {
+            title: '差旅分布',
+          },
+        },
       ],
     },
   ],

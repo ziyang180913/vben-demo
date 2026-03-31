@@ -50,17 +50,42 @@ export const getRuleIcon = (color: string = '#3455FF'): string => {
  * 酒店图标
  */
 export const getHotelIcon = (color: string = '#3455FF'): string => {
-  const icon = `<svg width="28px" height="30px" viewBox="0 0 28 30" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  const icon = `<svg width="28px" height="30px" viewBox="0 0 28 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>POI点_酒店</title>
     <defs>
-      <path d="M12.5,0 C19.4,0 25,5.59 25,12.5 C25,18.63 20.57,23.74 14.74,24.79 L12.5,28 L10.25,24.79 C4.42,23.74 0,18.63 0,12.5 C0,5.59 5.59,0 12.5,0 Z" id="hotel-path"></path>
+        <path d="M12.5,0 C19.4035594,0 25,5.59644063 25,12.5 C25,18.6383337 20.5754739,23.743264 14.7416551,24.7995574 L12.5,28 L10.2593476,24.7997389 C4.42503307,23.7438489 0,18.6386854 0,12.5 C0,5.59644063 5.59644063,0 12.5,0 Z" id="path-1"></path>
+        <filter x="-6.0%" y="-5.4%" width="112.0%" height="110.7%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="0.5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.25 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <linearGradient x1="50%" y1="7.63394851%" x2="50%" y2="76.0526456%" id="linearGradient-3">
+            <stop stop-color="#A5B4FF" offset="0%"></stop>
+            <stop stop-color="#3455FF" offset="100%"></stop>
+        </linearGradient>
     </defs>
-    <g transform="translate(1.5, 1)" fill="none" fill-rule="evenodd">
-      <use fill="${color}" xlink:href="#hotel-path"></use>
-      <circle fill="#FFFFFF" cx="12.5" cy="12.5" r="9.5"></circle>
-      <path d="M6.47 18.35 C6.21 18.35 6 18.14 6 17.88 C6 17.61 6.21 17.40 6.47 17.40 L7.29 17.40 L7.29 7.91 C7.29 7.13 7.93 6.5 8.72 6.5 L13.48 6.5 C14.26 6.5 14.90 7.13 14.90 7.91 L14.90 9.79 L16.33 9.79 C17.12 9.79 17.76 10.43 17.76 11.22 L17.76 17.40 L18.52 17.40 C18.78 17.40 19 17.61 19 17.88 C19 18.14 18.78 18.35 18.52 18.35 L6.47 18.35 Z" fill="${color}"></path>
+    <g id="酒店客研" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="酒店客研-地理属性" transform="translate(-765, -364)">
+            <g id="POI点_酒店" transform="translate(765, 365)">
+                <g id="编组-2" transform="translate(1.5, 0)">
+                    <g id="形状结合">
+                        <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                        <use fill="${color}" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    </g>
+                    <circle id="椭圆形" fill="#FFFFFF" cx="12.5" cy="12.5" r="9.5"></circle>
+                    <path d="M6.47584188,18.3579795 C6.21304166,18.3579795 6,18.1449378 6,17.8821376 C6,17.6193374 6.21304166,17.4062957 6.47584188,17.4062957 L7.294,17.406 L7.29428989,7.91800878 C7.29952122,7.13332724 7.93711654,6.5 8.72181552,6.5 L13.4802343,6.5 C14.2649332,6.5 14.9025286,7.13332724 14.9077599,7.91800878 L14.907,9.792 L16.3352855,9.79282577 C17.1252231,9.79805726 17.7628111,10.4399133 17.762,17.406 L18.5241581,17.4062957 C18.7869583,17.4062957 19,17.6193374 19,17.8821376 C19,18.1449378 18.7869583,18.3579795 18.5241581,18.3579795 L6.47584188,18.3579795 Z M16.3352855,10.7540263 L14.9077599,10.7540263 L14.9077599,17.4062957 L16.8111274,17.4062957 L16.8111274,11.2393851 C16.8136847,11.1115432 16.7646828,10.9880516 16.6751664,10.8967449 C16.5856501,10.8054382 16.463153,10.7540263 16.3352855,10.7540263 Z M12.2430454,12.1720351 L9.78770132,12.1720351 C9.52490111,12.1720351 9.31185945,12.3850768 9.31185945,12.647877 C9.31185945,12.9106772 9.52490112,13.1237189 9.78770132,13.1237189 L12.2430454,13.1237189 C12.5058456,13.1237189 12.7188873,12.9106772 12.7188873,12.647877 C12.7188873,12.5216759 12.6687541,12.4006437 12.5795164,12.311406 C12.4902787,12.2221683 12.3692465,12.1720351 12.2430454,12.1720351 Z M12.2430454,9.83089311 L9.78770132,9.83089311 C9.52490111,9.83089311 9.31185945,10.0439348 9.31185945,10.306735 C9.31185945,10.5695352 9.52490111,10.7825769 9.78770132,10.7825769 L12.2430454,10.7825769 C12.3692465,10.7825769 12.4902787,10.7324437 12.5795164,10.643206 C12.6687541,10.5539683 12.7188873,10.4329361 12.7188873,10.306735 C12.7188873,10.1805339 12.6687541,10.0595016 12.5795164,9.97026397 C12.4902787,9.88102631 12.3692465,9.83089311 12.2430454,9.83089311 Z" id="形状结合" fill="${color}" fill-rule="nonzero"></path>
+                </g>
+            </g>
+        </g>
     </g>
-  </svg>`;
-  return svgToBase64(icon);
+</svg>`;
+  // 将SVG代码转换为UTF-8编码的字节数组
+  const utf8Bytes = new TextEncoder().encode(icon);
+  // 将字节数组编码为Base64
+  const base64Svg =
+    'data:image/svg+xml;base64,' +
+    window.btoa(String.fromCharCode.apply(null, Array.from(utf8Bytes)));
+  return base64Svg;
 };
 
 /**

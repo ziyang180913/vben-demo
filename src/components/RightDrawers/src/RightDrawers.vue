@@ -18,10 +18,15 @@
               <QuestionCircleOutlined class="title-icon" />
             </Tooltip>
           </div>
-          <div v-if="desc" class="right-drawers-table-title-info">{{ desc }}</div>
+          <div v-if="$slots.desc || desc" class="right-drawers-table-title-info">
+            <slot name="desc">
+              <component :is="desc" v-if="typeof desc === 'object' || typeof desc === 'function'" />
+              <template v-else>{{ desc }}</template>
+            </slot>
+          </div>
           <div class="table-title-float-right">
             <span v-if="feedBackInfo" class="btn" @click="emit('feedback')"> 反馈 </span>
-            <div v-if="feedBackInfo && hasExport" class="line"></div>
+            <!-- <div v-if="feedBackInfo && hasExport" class="line"></div> -->
             <span v-if="hasExport" class="btn" @click="emit('export')"> 导出 </span>
           </div>
         </div>
@@ -34,22 +39,21 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, useAttrs, computed } from 'vue';
+  import { ref } from 'vue';
+  import type { PropType, Component } from 'vue';
   import { Tooltip } from 'ant-design-vue';
   import { QuestionCircleOutlined, RightOutlined, LeftOutlined } from '@ant-design/icons-vue';
 
-  const props = defineProps({
+  defineProps({
     title: String,
     titleTips: String,
-    desc: String,
+    desc: [String, Object, Function] as PropType<string | Component>,
     feedBackInfo: Boolean,
+    hasExport: Boolean,
     style: Object,
   });
 
   const emit = defineEmits(['open', 'export', 'feedback']);
-
-  const attrs = useAttrs();
-  const hasExport = computed(() => !!attrs.onExport);
 
   const showPortrait = ref(false);
 

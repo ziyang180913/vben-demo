@@ -1,0 +1,220 @@
+// 调色盘
+@primary-color: #2f54eb;
+@panel-bg: #ffffff;
+@text-main: #323233;
+@text-sub: #969799;
+@border-base: #f0f0f0;
+
+.gis-container {
+  display: flex;
+  position: absolute;
+  top: 70px;
+  left: 20px;
+  background: transparent;
+
+  /* --- 左侧面板 --- */
+  .side-panel {
+    display: flex;
+    z-index: 10;
+    flex-direction: column;
+    width: 230px;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    border-radius: 8px;
+    background: @panel-bg;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
+
+    &.is-collapsed {
+      width: 56px;
+
+      .title,
+      .panel-scroll-content {
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding: 0 16px;
+      border-bottom: 1px solid @border-base;
+      cursor: pointer;
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .primary-icon {
+          color: @primary-color;
+          font-size: 18px;
+        }
+
+        .title {
+          color: @text-main;
+          font-size: 16px;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    .panel-scroll-content {
+      flex: 1;
+      padding: 8px 0;
+      overflow-y: auto;
+
+      .ctrl-group {
+        margin-bottom: 12px;
+
+        .group-title {
+          padding: 8px 16px;
+          color: @text-sub;
+          font-size: 12px;
+          font-weight: normal;
+        }
+
+        .ctrl-items {
+          .ctrl-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            transition: all 0.2s;
+
+            &:hover {
+              background: #f7f8fa;
+            }
+
+            &.is-active {
+              background: #eef2ff;
+
+              .label {
+                color: @primary-color;
+                font-weight: 500;
+              }
+            }
+
+            .label {
+              flex: 1;
+              margin-left: 12px;
+              color: @text-main;
+              font-size: 14px;
+              white-space: nowrap;
+            }
+
+            .poi-color-bar {
+              width: 14px;
+              height: 3px;
+              margin-left: 12px;
+              border-radius: 1px;
+            }
+
+            .arrow-icon {
+              color: #c8c9cc;
+              font-size: 12px;
+            }
+
+            &.clickable {
+              cursor: pointer;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .config-panels-wrapper {
+    // display: flex;
+    position: absolute;
+    z-index: 100;
+    top: 60px;
+    left: 250px; /* 侧边栏宽度 + 间距 */
+    // flex-direction: column;
+    // pointer-events: none; /* 穿透到地图 */
+    // gap: 15px; /* 面板之间的间距 */
+  }
+
+  /* --- 右侧配置弹窗 --- */
+  .config-drawer {
+    // position: absolute;
+    z-index: 9;
+    // top: 60px;
+    // left: 250px;
+    width: 320px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+
+    .drawer-header {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .drawer-body {
+      .form-item {
+        margin-bottom: 18px;
+
+        label {
+          display: block;
+          margin-bottom: 8px;
+          font-size: 13px;
+        }
+
+        .full-width-radio {
+          display: flex;
+
+          :deep(.ant-radio-button-wrapper) {
+            flex: 1;
+            text-align: center;
+          }
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: end;
+        padding-bottom: 16px;
+        border-bottom: 1px dashed @border-base;
+        gap: 8px;
+
+        :deep(.ant-btn) {
+          width: 80px;
+        }
+      }
+
+      .view-toggles {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 16px;
+
+        .toggle-unit {
+          display: flex;
+          // flex-direction: column;
+          align-items: center;
+          gap: 6px;
+
+          span {
+            color: @text-sub;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* 动画效果 */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-20px);
+  opacity: 0;
+}

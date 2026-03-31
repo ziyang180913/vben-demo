@@ -242,13 +242,18 @@
   };
 
   const clearAllOverlay = () => {
-    props.map.clearEvents('mousemove');
-    overlayLayer.value?.clearOverlays();
-    selectAddressOpen.value = false;
-    props.clearCover?.();
-    props.map.clearInfoWindow();
-    selectPoints.value = { open: false, params: {} };
-    ruler.value?.turnOff();
+    try {
+      leftMarker.value?.hide();
+      props.map.clearEvents('mousemove');
+      overlayLayer.value?.clearOverlays();
+      selectAddressOpen.value = false;
+      props.clearCover?.();
+      props.map.clearInfoWindow();
+      selectPoints.value = { open: false, params: {} };
+      ruler.value?.turnOff();
+    } catch (error) {
+      console.log('>>>>>>>error', error);
+    }
   };
 
   const addOverlay = (data: any, type: string, option: Record<string, any> = {}) => {
@@ -296,7 +301,7 @@
     createArea(data?.path, key, data?.area, data);
     if (isFence(data?.path, data?.area)) {
       // 调用 addOverlay 时，内部生成的覆盖物需要打标
-      addOverlay(data, type, { ...option, isFinished: true });
+      addOverlay(data, type, { ...option });
       if (props.callback && !props.isOk) {
         props.callback(data, type);
       }
@@ -388,7 +393,7 @@
         props.map.setDefaultCursor('pointer');
         if (props.callback && !props.isOk) {
           props.callback(null, 'clear');
-          clearAllOverlay();
+          // clearAllOverlay();
         }
         // props.clearCover?.();
         clearAllOverlay();
