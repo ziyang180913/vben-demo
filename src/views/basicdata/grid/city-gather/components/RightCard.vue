@@ -83,8 +83,8 @@
   import { Spin as ASpin, Tabs as ATabs, DatePicker as ADatePicker } from 'ant-design-vue';
   import type { TabsProps } from 'ant-design-vue';
   import dayjs from 'dayjs';
-  import PieChart from './PieChart.vue';
-  import ColumnPlot from './ColumnPlot.vue';
+  import PieChart from '@/components/Echart/PieChart/PieChart.vue';
+  import ColumnPlot from '@/components/Echart/ColumnPlot/ColumnPlot.vue';
   import Portrait from './Portrait.vue';
   import Ranking from './Ranking.vue';
   import BrandRecommend from './BrandRecommend.vue';

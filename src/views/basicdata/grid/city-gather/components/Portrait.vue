@@ -25,8 +25,8 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
   import { Spin as ASpin } from 'ant-design-vue';
-  import PieChart from './PieChart.vue';
-  import ColumnPlot from './ColumnPlot.vue';
+  import PieChart from '@/components/Echart/PieChart/PieChart.vue';
+  import ColumnPlot from '@/components/Echart/ColumnPlot/ColumnPlot.vue';
 
   interface Props {
     callback?: (params: { date: any; checked: number }) => Promise<Record<string, any>>;
