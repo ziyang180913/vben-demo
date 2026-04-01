@@ -140,7 +140,7 @@
     max-width: calc(100vw - 900px);
     padding: 12px 16px;
     border: 1px solid #f0f0f0;
-    border-radius: 12px;
+    border-radius: 8px;
     background: #fff;
     box-shadow: 0 4px 12px rgb(0 0 0 / 8%);
 

@@ -46,6 +46,14 @@ const basicData: AppRouteModule = {
             title: '差旅分布',
           },
         },
+        {
+          path: '/basicdata/grid/city-gather',
+          name: 'CityGather',
+          component: () => import('@/views/basicdata/grid/city-gather/index.vue'),
+          meta: {
+            title: '差旅聚客圈分布',
+          },
+        },
       ],
     },
   ],
