@@ -137,7 +137,7 @@
     min-width: 520px;
 
     /* 根据侧边栏位置动态限制最大宽度，触发自动换行 */
-    max-width: calc(100vw - 800px);
+    max-width: calc(100vw - 900px);
     padding: 12px 16px;
     border: 1px solid #f0f0f0;
     border-radius: 12px;

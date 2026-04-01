@@ -6,7 +6,6 @@
         @click="
           () => {
             isCollapsed = !isCollapsed;
-            // 保持你原有的逻辑，或者改为不重置 activePanels
           }
         "
       >
@@ -29,7 +28,11 @@
               class="ctrl-item clickable"
               :class="{ 'is-active': activePanels.analysis === 'overnight' }"
             >
-              <Switch v-model:checked="state.overnight" size="small" />
+              <Switch
+                v-model:checked="state.overnight"
+                size="small"
+                @change="(val) => handleSwitchChange('overnight', val)"
+              />
               <span class="label">过夜热力分析</span>
               <right-outlined class="arrow-icon" @click.stop="handlePopupToggle('overnight')" />
             </div>
@@ -38,7 +41,11 @@
               class="ctrl-item clickable"
               :class="{ 'is-active': activePanels.analysis === 'daytime' }"
             >
-              <Switch v-model:checked="state.daytime" size="small" />
+              <Switch
+                v-model:checked="state.daytime"
+                size="small"
+                @change="(val) => handleSwitchChange('daytime', val)"
+              />
               <span class="label">白天聚客分析</span>
               <right-outlined class="arrow-icon" @click.stop="handlePopupToggle('daytime')" />
             </div>
@@ -52,7 +59,7 @@
               <Switch
                 v-model:checked="poi.visible"
                 size="small"
-                @change="(val) => onPoiChange(poi.key, val)"
+                @change="(val) => onPoiChange(poi, val)"
               />
               <div class="poi-color-bar" :style="{ background: poi.color }"></div>
               <span class="label">{{ poi.label }}</span>
@@ -104,16 +111,20 @@
 
             <div class="view-toggles">
               <div class="toggle-unit">
-                <Switch v-model:checked="queryConfig.showGrid" size="small" />
+                <Switch :checked="queryConfig.showGrid" size="small" @change="onGridChange" />
                 <span>网格</span>
               </div>
               <div class="toggle-unit">
-                <Switch v-model:checked="queryConfig.showValue" size="small" />
-                <span>数值</span>
+                <Switch
+                  :checked="queryConfig.showValue"
+                  size="small"
+                  @change="onGridPopulationChange"
+                />
+                <span>网格数值</span>
               </div>
               <div class="toggle-unit">
-                <Switch v-model:checked="queryConfig.showHeat" size="small" />
-                <span>热力</span>
+                <Switch :checked="queryConfig.showHeat" size="small" @change="onHeatmapChange" />
+                <span>热力图</span>
               </div>
             </div>
           </div>
@@ -175,7 +186,6 @@
 
   const isCollapsed = ref(false);
 
-  // 1. 核心补充：将 activePopup 改为对象，实现独立且可共存的状态
   const activePanels = reactive({
     analysis: null as 'overnight' | 'daytime' | null,
     business: false,
@@ -183,8 +193,8 @@
 
   const state = reactive({
     baseInfo: false,
-    overnight: true,
-    daytime: false,
+    overnight: false, // 初始设为关闭
+    daytime: false, // 初始设为关闭
   });
 
   const poiList = ref<PoiItem[]>([
@@ -192,7 +202,7 @@
     { key: 'subway', label: '地铁站', color: '#FADB14', visible: false },
     { key: 'mall', label: '商场', color: '#1890FF', visible: false },
     { key: 'airport', label: '机场', color: '#52C41A', visible: false },
-    { key: 'railway', label: '火车站/高铁站', color: '#1890FF', visible: false },
+    { key: 'railway', label: '火车站/高铁站', color: '#6FCDEF', visible: false },
     { key: 'scenery', label: '大型景区', color: '#F5222D', visible: false },
     { key: 'hospital', label: '大型医院', color: '#EB2F96', visible: false },
     { key: 'exhibition', label: '展览馆', color: '#FAAD14', visible: false },
@@ -204,7 +214,7 @@
     minPeople: '',
     gridSize: '100',
     showGrid: false,
-    showValue: true,
+    showValue: false,
     showHeat: true,
   });
 
@@ -212,47 +222,103 @@
   const categroyStore = useCategroyStore();
   const formatOptions = computed(() => categroyStore.getCategroyTree);
 
-  // 2. 核心补充：修改后的开关逻辑
+  // 互斥逻辑：处理直接点击 Switch 的情况
+  const handleSwitchChange = (type: 'overnight' | 'daytime', val: boolean) => {
+    if (val) {
+      if (type === 'overnight') state.daytime = false;
+      else state.overnight = false;
+      emit('analysisQuery', { type, config: { ...queryConfig } });
+    } else {
+      emit('analysisQuery', { type: null, config: { ...queryConfig } });
+    }
+    // 如果关闭了 Switch，且当前面板正是该类型，则关闭面板
+    if (!val && activePanels.analysis === type) {
+      activePanels.analysis = null;
+    }
+  };
+
   const handlePopupToggle = (type: 'overnight' | 'daytime' | 'business') => {
     if (type === 'business') {
       activePanels.business = !activePanels.business;
     } else {
-      // 地图分析两个互斥，但与业务面板独立
+      // 展开/折叠逻辑：点击右侧箭头仅控制面板显隐
       activePanels.analysis = activePanels.analysis === type ? null : type;
     }
   };
 
-  // 地图分析重置查询
   const resetQuery = () => {
     queryConfig.minPeople = '';
     queryConfig.gridSize = '100';
   };
 
-  // 业态重置查询
   const resetBusinessQuery = () => {
     cascaderValue.value = [];
   };
-  // 地图分析提交查询
-  const submitQuery = () => {
-    console.log('触发 GIS 查询:', { ...queryConfig });
+
+  const emitDisplayChange = () => {
+    const currentType = state.overnight ? 'overnight' : state.daytime ? 'daytime' : null;
+    emit('analysisDisplay', { type: currentType, config: { ...queryConfig } });
   };
-  // 业态提交查询
+
+  // 交互逻辑
+  const onHeatmapChange = (checked: boolean) => {
+    if (checked) {
+      queryConfig.showValue = false;
+      queryConfig.showGrid = false;
+    }
+    queryConfig.showHeat = checked;
+    emitDisplayChange();
+  };
+
+  const onGridChange = (checked: boolean) => {
+    queryConfig.showGrid = checked;
+    if (checked) {
+      queryConfig.showHeat = false;
+      queryConfig.showValue = true;
+    } else {
+      queryConfig.showValue = false;
+    }
+    emitDisplayChange();
+  };
+
+  const onGridPopulationChange = (checked: boolean) => {
+    if (queryConfig.showGrid) {
+      queryConfig.showValue = checked;
+      emitDisplayChange();
+    }
+  };
+
+  // 核心逻辑：点击确定时开启对应的开关，并执行互斥
+  const submitQuery = () => {
+    const currentType = activePanels.analysis;
+    if (currentType === 'overnight') {
+      state.overnight = true;
+      state.daytime = false;
+      emit('analysisQuery', { type: 'overnight', config: { ...queryConfig } });
+    } else if (currentType === 'daytime') {
+      state.daytime = true;
+      state.overnight = false;
+      emit('analysisQuery', { type: 'daytime', config: { ...queryConfig } });
+    }
+  };
+
   const submitBusinessQuery = () => {
     console.log('触发业态 查询:', cascaderValue.value);
   };
 
-  const onPoiChange = (key: string, visible: boolean) => {
-    console.log(`POI 变更: ${key} -> ${visible}`);
-    // 如果关闭了业态 Switch，自动关闭对应的配置面板
-    if (key === 'business' && !visible) {
+  const emit = defineEmits(['poiChange', 'poiLookInfo', 'analysisQuery', 'analysisDisplay']);
+
+  const onPoiChange = (poi: PoiItem, visible: boolean) => {
+    if (poi.key === 'business' && !visible) {
       activePanels.business = false;
     }
+    emit('poiChange', { ...poi, visible });
   };
 
   watch(
-    () => state.overnight,
+    () => state.baseInfo,
     (newVal) => {
-      if (!newVal && activePanels.analysis === 'overnight') activePanels.analysis = null;
+      emit('poiLookInfo', newVal);
     },
   );
 
@@ -260,6 +326,10 @@
     if (!formatOptions.value || formatOptions.value.length === 0) {
       categroyStore.fetchCategroyTree();
     }
+  });
+
+  defineExpose({
+    baseInfo: computed(() => state.baseInfo),
   });
 </script>
 
