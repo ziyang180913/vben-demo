@@ -7,40 +7,74 @@ export const modalProps = {
   scrollTop: { type: Boolean, default: true },
   height: { type: Number },
   minHeight: { type: Number },
+  // open drag
   draggable: { type: Boolean, default: true },
   centered: { type: Boolean },
   cancelText: { type: String, default: '取消' },
-  okText: { type: String, default: '确定' },
+  okText: { type: String, default: '确认' },
 
   closeFunc: Function as PropType<() => Promise<boolean>>,
 };
 
 export const basicProps = Object.assign({}, modalProps, {
   defaultFullscreen: { type: Boolean },
+  // Can it be full screen
   canFullscreen: { type: Boolean, default: true },
+  // After enabling the wrapper, the bottom can be increased in height
   wrapperFooterOffset: { type: Number, default: 0 },
+  // Warm reminder message
   helpMessage: [String, Array] as PropType<string | string[]>,
-  showConfirmBtn: { type: Boolean, default: true },
+  // Whether to setting wrapper
+  useWrapper: { type: Boolean, default: true },
+  loading: { type: Boolean },
+  loadingTip: { type: String },
+  /**
+   * @description: Show close button
+   */
   showCancelBtn: { type: Boolean, default: true },
-  reverseBtn: { type: Boolean, default: false },
-  footerOffset: { type: Number, default: 0 },
-  modalFooterOffset: { type: Number },
+  /**
+   * @description: Show confirmation button
+   */
+  showOkBtn: { type: Boolean, default: true },
+
+  wrapperProps: Object as PropType<Partial<ModalWrapperProps>>,
+
+  afterClose: Function as PropType<() => Promise<VueNode>>,
+
+  bodyStyle: Object as PropType<CSSProperties>,
+
   closable: { type: Boolean, default: true },
-  closeIcon: { type: Object as PropType<any> },
+
+  closeIcon: Object as PropType<VueNode>,
+
+  confirmLoading: { type: Boolean },
+
+  destroyOnClose: { type: Boolean },
+
+  footer: Object as PropType<VueNode>,
+
+  getContainer: Function as PropType<() => any>,
+
+  mask: { type: Boolean, default: true },
+
   maskClosable: { type: Boolean, default: true },
   keyboard: { type: Boolean, default: true },
-  centered: { type: Boolean },
-  width: [String, Number] as PropType<string | number>,
-  title: { type: String as PropType<string>, default: '' },
-  content: { type: String as PropType<string> },
-  action: { type: Object as PropType<any> },
-  loading: { type: Boolean, default: false },
-  loadingTip: { type: String as PropType<string> },
-  showActionButtonGroup: { type: Boolean, default: true },
-  showAdvancedButton: { type: Boolean, default: true },
-  formConfig: { type: Object as PropType<any> },
-  wrapClassName: { type: String as PropType<string> },
-  ref: Object as PropType<any>,
 
-  tableResult: { type: Object as PropType<any> },
+  maskStyle: Object as PropType<CSSProperties>,
+
+  okType: { type: String, default: 'primary' },
+
+  okButtonProps: Object as PropType<ButtonProps>,
+
+  cancelButtonProps: Object as PropType<ButtonProps>,
+
+  title: { type: String },
+
+  open: { type: Boolean },
+
+  width: [String, Number] as PropType<string | number>,
+
+  wrapClassName: { type: String },
+
+  zIndex: { type: Number },
 });

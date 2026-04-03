@@ -1,0 +1,24 @@
+.shopping-preferences-styles {
+  position: relative;
+
+  .amap-info-sharp {
+    bottom: -6px;
+    left: 50%;
+    border-top: 8px solid #fff;
+    margin-left: -8px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    &::after {
+      position: absolute;
+      content: '';
+      margin-top: -7px;
+      border-top: 8px solid rgba(0, 0, 0, 0.3);
+      filter: blur(2px);
+      z-index: -1;
+    }
+  }
+
+  .poi-card-info-box{
+    top: 20px;
+  }
+}

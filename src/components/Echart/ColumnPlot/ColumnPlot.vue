@@ -14,11 +14,11 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, shallowRef, onMounted, onUnmounted, watch, computed, nextTick } from 'vue';
-  import * as echarts from 'echarts';
+  import { ref, watch, computed } from 'vue';
+  import type { EChartsOption } from 'echarts';
   import { merge } from 'lodash-es';
-  // 引入 Ant Design Vue 的 Empty 组件
   import { Empty as AEmpty } from 'ant-design-vue';
+  import { useECharts } from '@/hooks/web/useECharts';
 
   interface DataItem {
     type: string;
@@ -31,10 +31,8 @@
     height?: number;
     legend?: boolean;
     colors?: string[];
-    options?: echarts.EChartsOption;
-    // 新增：支持自定义空状态文字
+    options?: EChartsOption;
     emptyDescription?: string;
-    // 新增：支持自定义空状态图片 (Simple | Presentation | string)
     emptyImage?: any;
     meta?: {
       value?: {
@@ -47,29 +45,26 @@
   const props = withDefaults(defineProps<Props>(), {
     height: 200,
     legend: true,
-    colors: () => ['#4D6AFF', '#36CBCB', '#FF7A7D', '#FAD336', '#B57FEE', '#4DCB73'],
+    colors: () => ['#4D6AFF', '#4DCB73', '#36CBCB', '#B57FEE', '#FF7A7D', '#5B8BEE', '#FAD337'],
     options: () => ({}),
     emptyDescription: '暂无数据',
-    emptyImage: AEmpty.PRESENTED_IMAGE_SIMPLE, // 默认使用简洁版图片
+    emptyImage: AEmpty.PRESENTED_IMAGE_SIMPLE,
   });
 
-  const chartRef = ref<HTMLElement>();
-  const chartInstance = shallowRef<echarts.ECharts | null>(null);
-  let resizeObserver: ResizeObserver | null = null;
+  const chartRef = ref<HTMLDivElement>();
+  const { setOptions, getInstance } = useECharts(chartRef);
 
   // 判断数据是否为空
   const isEmpty = computed(() => !props.data || props.data.length === 0);
 
-  /**
-   * 核心逻辑：合并默认配置与外部配置
-   */
-  const finalOption = computed(() => {
+  // 获取图表配置
+  const getChartOption = (): EChartsOption => {
     if (isEmpty.value) return {};
 
     const formatter = props.meta?.value?.formatter;
     const alias = props.meta?.value?.alias || '数值';
 
-    const baseOption: echarts.EChartsOption = {
+    const baseOption: EChartsOption = {
       color: props.colors,
       tooltip: {
         trigger: 'axis',
@@ -116,61 +111,25 @@
     };
 
     return merge({}, baseOption, props.options);
-  });
+  };
 
-  /**
-   * 渲染/更新图表
-   */
-  const renderChart = async () => {
+  // 渲染图表
+  const renderChart = () => {
     if (isEmpty.value) {
-      if (chartInstance.value) {
-        chartInstance.value.clear();
-      }
+      const instance = getInstance();
+      instance?.clear();
       return;
     }
-
-    await nextTick();
-
-    if (!chartInstance.value && chartRef.value) {
-      chartInstance.value = echarts.init(chartRef.value);
-    }
-
-    if (chartInstance.value) {
-      chartInstance.value.setOption(finalOption.value, { notMerge: true });
-    }
+    setOptions(getChartOption(), true);
   };
 
-  const initChart = async () => {
-    if (isEmpty.value) return;
-
-    await nextTick();
-    if (!chartRef.value) return;
-
-    chartInstance.value = echarts.init(chartRef.value);
-    renderChart();
-
-    resizeObserver = new ResizeObserver(() => {
-      chartInstance.value?.resize();
-    });
-    resizeObserver.observe(chartRef.value);
-  };
-
-  onMounted(initChart);
-
-  onUnmounted(() => {
-    resizeObserver?.disconnect();
-    if (chartInstance.value) {
-      chartInstance.value.dispose();
-      chartInstance.value = null;
-    }
-  });
-
+  // 监听数据及配置变化
   watch(
     [() => props.data, () => props.options, () => props.colors, isEmpty],
     () => {
       renderChart();
     },
-    { deep: true },
+    { deep: true, immediate: true },
   );
 </script>
 

@@ -9,7 +9,7 @@ export interface PoiData {
   location: [number, number];
   color: string; // 默认颜色（点位背景及围栏填充）
   image: string; // 默认图标 Base64 或 URL
-  path?: [number, number][]; // 围栏路径：[[lng, lat], [lng, lat]...]
+  path?: [number, number][] | [number, number][][]; // 围栏路径：单个[[lng, lat], ...] 或多个[[[lng, lat], ...], ...]
   zIndex?: number;
   [key: string]: any;
 }
@@ -146,24 +146,31 @@ class PoiLayerManager {
       const isSelected = this.checkIsSelected(item);
       // 2. 渲染围栏 (Polygon)
       if (item.path && item.path.length > 0) {
-        const polygon = new AMap.Polygon({
-          path: item.path,
-          fillColor: isSelected ? this.options.currentColor.style.backgroundColor : item.color,
-          fillOpacity: 0.35,
-          strokeColor: isSelected ? '#FFFFFF' : item.color,
-          strokeWeight: isSelected ? 3 : 2,
-          strokeStyle: 'solid',
-          zIndex: isSelected ? 150 : 100,
-          bubble: true, // 允许事件穿透到下层或冒泡
-          extData: item,
-        });
+        // 判断是否为单个围栏：第一个元素是数字（坐标对的第一位）
+        const isSinglePath = typeof item.path[0][0] === 'number';
+        // 统一转为数组的数组格式
+        const paths = isSinglePath
+          ? [item.path as [number, number][]]
+          : (item.path as [number, number][][]);
 
-        if (this.options.isClickable) {
-          polygon.on('click', () => this.selectPosition(item.location, item));
-        }
-        polygonMarkers.push(polygon);
-        // this.map.add(polygon);
-        // this.polygonMap.set(item.id, polygon);
+        paths.forEach((path) => {
+          const polygon = new AMap.Polygon({
+            path,
+            fillColor: isSelected ? this.options.currentColor.style.backgroundColor : item.color,
+            fillOpacity: 0.35,
+            strokeColor: isSelected ? this.options.currentColor.style.backgroundColor : item.color,
+            strokeWeight: isSelected ? 3 : 2,
+            strokeStyle: 'solid',
+            zIndex: isSelected ? 150 : 100,
+            bubble: true, // 允许事件穿透到下层或冒泡
+            extData: item,
+          });
+
+          if (this.options.isClickable) {
+            polygon.on('click', () => this.selectPosition(item.location, item));
+          }
+          polygonMarkers.push(polygon);
+        });
       }
 
       // 3. 渲染点位 (LabelMarker)

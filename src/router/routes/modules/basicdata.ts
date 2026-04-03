@@ -56,6 +56,25 @@ const basicData: AppRouteModule = {
         },
       ],
     },
+    {
+      path: '/basicdata/guest-research',
+      name: 'GuestResearch',
+      component: getParentLayout('GuestResearch'),
+      meta: {
+        title: 'POI客研',
+      },
+      redirect: '/basicdata/guest-research/mall',
+      children: [
+        {
+          path: '/basicdata/guest-research/mall',
+          name: 'Mall',
+          component: () => import('@/views/basicdata/guest-research/mall/index.vue'),
+          meta: {
+            title: '商场客研',
+          },
+        },
+      ],
+    },
   ],
 };
 
