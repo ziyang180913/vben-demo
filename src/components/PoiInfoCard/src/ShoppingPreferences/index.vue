@@ -1,82 +1,66 @@
 <template>
-  <div class="shopping-preferences-styles" :style="{ height: '740px' }">
-    <ASpin :spinning="loading">
-      <div :id="mapId" class="map-container"></div>
-      <div class="side-panel">
-        <div class="work-panel shopping-preferences-work">
-          <div class="work-title">
-            <slot name="title">
-              <div style="display: flex">{{ title }}</div>
-            </slot>
-          </div>
-          <ATable
-            :columns="tableColumns"
-            :data-source="list"
-            :pagination="false"
-            size="small"
-            :scroll="{ y: 400 }"
-            :custom-row="customRow"
-            :row-class-name="rowClassName"
-          >
-            <template #bodyCell="{ column, record, text, index }">
-              <template v-if="column.key === 'index'">
-                {{ index + 1 }}
-              </template>
-              <template v-else-if="column.key === 'name'">
-                <ATooltip v-if="text && text.length > 10" :title="text">
-                  <span class="name-ellipsis">{{ text }}</span>
-                </ATooltip>
-                <span v-else>{{ text || '-' }}</span>
-              </template>
-              <template v-else-if="column.key === 'value'">
-                {{
-                  record.value ? record.value : `${(record.penetration * 100).toFixed(2) || '0'}%`
-                }}
-              </template>
-              <template v-else-if="column.key === 'operate'">
-                <a @click.stop="handleMoreClick(record)">更多</a>
-              </template>
-            </template>
-          </ATable>
+  <div class="shopping-preferences">
+    <!-- 使用 TemplateMap 组件 -->
+    <TemplateMap :initMapEvent="initMap" />
+
+    <!-- 左侧面板 - 可展开收起 -->
+    <div class="side-panel" :class="{ collapsed: isCollapsed }">
+      <!-- 面板内容 -->
+      <div v-show="!isCollapsed" class="panel-content">
+        <!-- 标题 -->
+        <div class="panel-header">
+          <span class="title">{{ title || '商场偏好' }}</span>
         </div>
-        <div v-if="showMoreInfo" class="more-info-card poi-card-info-box">
-          <div class="more-info-card__header">
-            <span class="more-info-card__title">{{ baseInfo.name }}</span>
-            <CloseOutlined class="close-btn" @click="baseInfo = {}" />
+
+        <!-- 简约列表 -->
+        <div class="list-container">
+          <div class="list-header">
+            <span class="col-index">序号</span>
+            <span class="col-name">名称</span>
+            <span class="col-ratio">人数比例</span>
+            <span class="col-action">操作</span>
           </div>
-          <div class="more-info-card__body">
-            <div v-for="item in infoLabels" :key="item.value" class="info-item">
-              <span class="info-label">{{ item.label }}:</span>
-              <span class="info-value">{{ baseInfo[item.value] || '-' }}</span>
+          <div class="list-body">
+            <div
+              v-for="(item, index) in list"
+              :key="item.id || index"
+              class="list-item"
+              :class="{ active: activeName === item.name }"
+              @click="handleItemClick(item)"
+            >
+              <span class="col-index">{{ index + 1 }}</span>
+              <span class="col-name" :title="item.name">{{ item.name }}</span>
+              <span class="col-ratio">{{ formatRatio(item.penetration) }}</span>
+              <span class="col-action">
+                <a @click.stop="handleMoreClick(item)">更多</a>
+              </span>
             </div>
           </div>
         </div>
       </div>
-    </ASpin>
+
+      <!-- 折叠按钮 - 放在面板内部 -->
+      <div class="collapse-btn" :class="{ 'is-collapsed': isCollapsed }" @click="toggleCollapse">
+        <LeftOutlined />
+      </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <PoiDetailModal
+      :visible="showMoreInfo"
+      :data="baseInfo"
+      @close="baseInfo = {}"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
-  import { Spin as ASpin, Table as ATable, Tooltip as ATooltip, message } from 'ant-design-vue';
-  import { CloseOutlined } from '@ant-design/icons-vue';
-  import { getPoiInfo } from '@/api/new-mall/insight';
-  import type { TableColumnsType } from 'ant-design-vue';
-
-  // 地图 DOM id
-  const mapId = 'do-map-shopping-preferences-map';
-
-  // 详情 label
-  const infoLabels = [
-    { label: '经营评分', value: 'score_rank' },
-    { label: '开业时间', value: 'open_date' },
-    { label: '经纬度', value: 'p_loc' },
-    { label: '商业面积', value: 'area' },
-    { label: '商业楼层', value: 'floor' },
-    { label: '营业状态', value: 'business_status' },
-    { label: '营业时间', value: 'open_hour' },
-    { label: '招商状态', value: 'investment_status' },
-  ];
+  import { ref, watch, computed } from 'vue';
+  import { LeftOutlined } from '@ant-design/icons-vue';
+  import PoiDetailModal from '../PoiDetailModal/index.vue';
+  import { TemplateMap } from '@/components/Amap/TemplateMap';
+  import PoiLayerManager from '@/utils/aMap/PoiLayerManager';
+  import { getCircleIcon } from '@/utils/aMap/icons';
 
   interface Props {
     info?: {
@@ -92,222 +76,353 @@
     title: '',
   });
 
-  // 地图相关实例（非响应式）
+  // 地图相关
   let mapInstance: any = null;
-  let markerInfo: any = null;
-  let markersList: any = null;
-  let overlayFenceGroup: any = null;
+  let poiLayerManager: PoiLayerManager | null = null;
 
   // 响应式状态
   const list = ref<any[]>([]);
   const baseInfo = ref<Record<string, any>>({});
-  const loading = ref(false);
   const activeName = ref('');
-  const theme = ref('normal');
-
-  // 表格列配置
-  const tableColumns: TableColumnsType = [
-    { title: '序号', dataIndex: 'index', key: 'index', width: 31 },
-    { title: '名称', dataIndex: 'name', key: 'name', width: 156 },
-    { title: '人数比例', dataIndex: 'value', key: 'value', width: 60 },
-    { title: '操作', dataIndex: 'operate', key: 'operate', width: 50 },
-  ];
+  const isCollapsed = ref(false);
 
   const showMoreInfo = computed(() => Object.keys(baseInfo.value).length > 0);
 
-  /**
-   * 生成 Marker 的 HTML 内容
-   */
-  const curMarkerDom = (data: any) => `
-    <div class="left-nav-poi-shadow aux-color-bg-b10 font-12-left-400-pr100"
-      style="display: inline-block;white-space: nowrap;padding: 4px 10px;border-radius: 4px;max-width: 140px;">
-      <div class="left-title font-12-left-600-pr85"
-        style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-        title="${data?.poi_name || data?.name}">
-        ${data?.poi_name || data?.name || '暂无'}
-      </div>
-      <div class="left-num font-12-left-500-pr45">
-        <span>指数：${(data.penetration * 100).toFixed(2) ?? '--'}%</span>
-      </div>
-      <div class="amap-info-sharp"></div>
-    </div>
-  `;
+  // Mock 数据
+  const mockData = [
+    {
+      p_id: '24086851',
+      p_name: '深圳大悦城购物中心',
+      ratio: 0.3362,
+      p_loc: '113.902959,22.568746',
+      pb_boundary: JSON.stringify([
+        [113.901, 22.567],
+        [113.905, 22.567],
+        [113.905, 22.57],
+        [113.901, 22.57],
+      ]),
+    },
+    {
+      p_id: '24086852',
+      p_name: '深圳宝安大仟里',
+      ratio: 0.069,
+      p_loc: '113.888,22.555',
+      pb_boundary: JSON.stringify([
+        [113.886, 22.553],
+        [113.89, 22.553],
+        [113.89, 22.557],
+        [113.886, 22.557],
+      ]),
+    },
+    {
+      p_id: '24086853',
+      p_name: '深圳天虹商场(宝安前进店)',
+      ratio: 0.0517,
+      p_loc: '113.910,22.580',
+      pb_boundary: JSON.stringify([
+        [113.908, 22.578],
+        [113.912, 22.578],
+        [113.912, 22.582],
+        [113.908, 22.582],
+      ]),
+    },
+    {
+      p_id: '24086854',
+      p_name: '深圳宝安勤诚达K+PLAZA',
+      ratio: 0.0517,
+      p_loc: '113.895,22.572',
+      pb_boundary: JSON.stringify([
+        [113.893, 22.57],
+        [113.897, 22.57],
+        [113.897, 22.574],
+        [113.893, 22.574],
+      ]),
+    },
+    {
+      p_id: '24086855',
+      p_name: '深圳上合优城购物中心',
+      ratio: 0.0431,
+      p_loc: '113.920,22.585',
+      pb_boundary: JSON.stringify([
+        [113.918, 22.583],
+        [113.922, 22.583],
+        [113.922, 22.587],
+        [113.918, 22.587],
+      ]),
+    },
+    {
+      p_id: '24086856',
+      p_name: '深圳宝立方',
+      ratio: 0.0431,
+      p_loc: '113.885,22.590',
+      pb_boundary: JSON.stringify([
+        [113.883, 22.588],
+        [113.887, 22.588],
+        [113.887, 22.592],
+        [113.883, 22.592],
+      ]),
+    },
+    {
+      p_id: '24086857',
+      p_name: '深圳壹方天地',
+      ratio: 0.0345,
+      p_loc: '113.930,22.600',
+      pb_boundary: JSON.stringify([
+        [113.928, 22.598],
+        [113.932, 22.598],
+        [113.932, 22.602],
+        [113.928, 22.602],
+      ]),
+    },
+    {
+      p_id: '24086858',
+      p_name: '深圳BREWTOWN啤酒小镇',
+      ratio: 0.0345,
+      p_loc: '113.870,22.565',
+      pb_boundary: JSON.stringify([
+        [113.868, 22.563],
+        [113.872, 22.563],
+        [113.872, 22.567],
+        [113.868, 22.567],
+      ]),
+    },
+    {
+      p_id: '24086859',
+      p_name: '深圳泰华商业城商铺',
+      ratio: 0.0345,
+      p_loc: '113.940,22.575',
+      pb_boundary: JSON.stringify([
+        [113.938, 22.573],
+        [113.942, 22.573],
+        [113.942, 22.577],
+        [113.938, 22.577],
+      ]),
+    },
+    {
+      p_id: '24086860',
+      p_name: '深圳坂田万科广场',
+      ratio: 0.0345,
+      p_loc: '113.950,22.620',
+      pb_boundary: JSON.stringify([
+        [113.948, 22.618],
+        [113.952, 22.618],
+        [113.952, 22.622],
+        [113.948, 22.622],
+      ]),
+    },
+    {
+      p_id: '24086861',
+      p_name: '深圳中洲πmall',
+      ratio: 0.0259,
+      p_loc: '113.860,22.550',
+      pb_boundary: JSON.stringify([
+        [113.858, 22.548],
+        [113.862, 22.548],
+        [113.862, 22.552],
+        [113.858, 22.552],
+      ]),
+    },
+    {
+      p_id: '24086862',
+      p_name: '深圳Bingo缤果空间',
+      ratio: 0.0259,
+      p_loc: '113.915,22.595',
+      pb_boundary: JSON.stringify([
+        [113.913, 22.593],
+        [113.917, 22.593],
+        [113.917, 22.597],
+        [113.913, 22.597],
+      ]),
+    },
+    {
+      p_id: '24086863',
+      p_name: '深圳宝安天虹购物中心',
+      ratio: 0.0259,
+      p_loc: '113.900,22.610',
+      pb_boundary: JSON.stringify([
+        [113.898, 22.608],
+        [113.902, 22.608],
+        [113.902, 22.612],
+        [113.898, 22.612],
+      ]),
+    },
+    {
+      p_id: '24086864',
+      p_name: '深圳DM港隆城',
+      ratio: 0.0259,
+      p_loc: '113.855,22.540',
+      pb_boundary: JSON.stringify([
+        [113.853, 22.538],
+        [113.857, 22.538],
+        [113.857, 22.542],
+        [113.853, 22.542],
+      ]),
+    },
+    {
+      p_id: '24086865',
+      p_name: '深圳时代城购物中心',
+      ratio: 0.0259,
+      p_loc: '113.925,22.630',
+      pb_boundary: JSON.stringify([
+        [113.923, 22.628],
+        [113.927, 22.628],
+        [113.927, 22.632],
+        [113.923, 22.632],
+      ]),
+    },
+  ];
 
-  /**
-   * 初始化高德地图
-   */
-  const initMap = async (center?: any) => {
-    await (window as any).Utils.map.loadMapJs();
-    await (window as any).Utils.map.loadLocal();
-    await (window as any).Utils.map.initPlugin('AMap', [
-      'HeatMap',
-      'MarkerCluster',
-      'IndexCluster',
-      'Geocoder',
-      'MouseTool',
-      'CircleEditor',
-    ]);
-    const map = new (window as any).AMap.Map(mapId, {
-      resizeEnable: true,
-      zoom: 14.5,
-      center: center || [],
-      mapStyle: 'amap://styles/' + theme.value,
-    });
-    return map;
+  // 格式化比例
+  const formatRatio = (val: number) => {
+    if (val === undefined || val === null) return '-';
+    return `${(val * 100).toFixed(2)}%`;
   };
 
-  /**
-   * 生成海量点位及围栏
-   */
-  const createMassMarks = (data: any[]) => {
-    if (markersList && overlayFenceGroup && markerInfo) {
-      markersList.clearOverlays();
-      overlayFenceGroup.clearOverlays();
-      markerInfo.hide();
+  // 切换展开/收起
+  const toggleCollapse = () => {
+    isCollapsed.value = !isCollapsed.value;
+  };
+
+  // 初始化地图
+  const initMap = (map: any) => {
+    mapInstance = map;
+
+    // 设置地图中心 - 使用 mock 数据的中心位置
+    const center = props.info?.location || [113.902959, 22.568746];
+    map.setCenter(center);
+    map.setZoom(13);
+
+    // 初始化 POI 图层管理器
+    poiLayerManager = new PoiLayerManager(mapInstance, {
+      isClickable: true,
+      isInfoStatus: false,
+      collision: false,
+      allowCollision: false,
+    });
+    poiLayerManager.init();
+
+    // 使用 mock 数据渲染
+    renderPois(mockData);
+
+    // 更新列表数据
+    const res = mockData.map((item) => {
+      const fence = item.pb_boundary ? JSON.parse(item.pb_boundary) : [];
+      const location = item.p_loc ? item.p_loc.split(',').map(Number) : [0, 0];
+      return {
+        ...item,
+        name: item.p_name,
+        penetration: item.ratio,
+        fence,
+        location,
+        lng: location[0],
+        lat: location[1],
+        id: item.p_id,
+      };
+    });
+    list.value = res;
+  };
+
+  // 渲染 POI
+  const renderPois = (data: any[]) => {
+    if (!poiLayerManager) return;
+
+    const poiData = data.map((item, index) => {
+      const fence = item.pb_boundary ? JSON.parse(item.pb_boundary) : [];
+      const location = item.p_loc ? item.p_loc.split(',').map(Number) : [0, 0];
+      return {
+        ...item,
+        id: item.p_id || item.competitor_p_id || index,
+        name: item.p_name,
+        location,
+        lng: location[0],
+        lat: location[1],
+        path: Array.isArray(fence) ? fence : [fence],
+        color: '#4E6AFF',
+        image: getCircleIcon('#4E6AFF'),
+        zIndex: index,
+      };
+    });
+
+    poiLayerManager.createPoiLayer(poiData, (selectedData) => {
+      activeName.value = selectedData.name;
+    });
+  };
+
+  // 列表项点击
+  const handleItemClick = (item: any) => {
+    activeName.value = item.name;
+
+    // 地图定位到该点位
+    if (mapInstance && item.lng && item.lat) {
+      const pixel = mapInstance.lngLatToPixel([item.lng, item.lat], 16);
+      pixel.x -= 150;
+      const lnglat = mapInstance.pixelToLngLat(pixel, 16);
+      mapInstance.setZoomAndCenter(16, lnglat, true);
     }
-    const markers: any[] = [];
-    const kedaMarks: any[] = [];
-    const ranking = (window as any).Utils.mapContentDom.ranking;
 
-    data.forEach((item, i) => {
-      const marker1 = new (window as any).AMap.Marker({
-        extData: item,
-        content: `<div class="marker-box"><div class="marker-img">${ranking(i + 1)}</div></div>`,
-        position: [item.lng, item.lat],
-        anchor: 'bottom-center',
-      });
-      const markerFence = new (window as any).AMap.Polygon({
-        path: item.fence,
-        fillColor: '#4E6AFF',
-        strokeColor: '#4E6AFF',
-        strokeOpacity: 1,
-        fillOpacity: 0.25,
-        strokeStyle: 'solid',
-        strokeWeight: 1,
-      });
-      markers.push(marker1);
-      kedaMarks.push(markerFence);
-    });
-
-    markersList = new (window as any).AMap.OverlayGroup(markers);
-    overlayFenceGroup = new (window as any).AMap.OverlayGroup(kedaMarks);
-    mapInstance.add(markersList);
-    mapInstance.add(overlayFenceGroup);
-
-    markersList.on('click', (e: any) => {
-      const data = e?.target?.getExtData();
-      markerInfo.show();
-      markerInfo.setPosition([data?.lng, data?.lat]);
-      markerInfo.setContent(curMarkerDom(data));
-    });
+    // 高亮对应的 POI
+    if (poiLayerManager) {
+      poiLayerManager.selectPosition([item.lng, item.lat], item);
+    }
   };
 
-  /**
-   * 列表锚点定位
-   */
-  const onListPoint = (params: any) => {
-    const pixel = mapInstance.lngLatToPixel([params?.lng, params?.lat], 16);
-    pixel.x -= 200;
-    const lnglat = mapInstance.pixelToLngLat(pixel, 16);
-    mapInstance.setZoomAndCenter(16, lnglat, true);
-    baseInfo.value = {};
-    activeName.value = params.name;
-    markerInfo.show();
-    markerInfo.setPosition([params?.lng, params?.lat]);
-    markerInfo.setContent(curMarkerDom(params));
-  };
-
-  /**
-   * 获取 POI 详情
-   */
+  // 获取 POI 详情
   const getPoiBaseInfo = async (values: any) => {
-    if (!values?.id) return;
-    loading.value = true;
-    try {
-      const res = await getPoiInfo({ p_ids: values?.id, p_type: 1 });
-      if (res?.code !== 200) {
-        message.error(res?.message || '查询失败');
-        return;
-      }
-      const data = res?.data?.data?.[0];
-      baseInfo.value = data
-        ? {
-            ...data,
-            id: data?.p_id,
-            add: data?.p_add,
-            name: values?.name,
-            p_loc: values?.p_loc,
-          }
-        : {
-            id: values?.id,
-            name: values?.name,
-            p_loc: values?.p_loc,
-          };
-    } catch (err) {
-      message.error('查询失败');
-    } finally {
-      loading.value = false;
-    }
-  };
+    // 模拟详情数据
+    const mockDetailInfo = {
+      score_rank: 'A级',
+      open_date: '2020-08-15',
+      area: '250000平方米',
+      floor: 'B2-L6',
+      business_status: '营业中',
+      open_hour: '10:00-22:00',
+      investment_status: '已满租',
+      add: '宝安区中心区25区创业二路与前进一路交汇处',
+    };
 
-  const handleMoreClick = (record: any) => {
-    getPoiBaseInfo({
-      ...record,
-      id: record?.competitor_p_id || record?.p_id,
-    });
-  };
-
-  const customRow = (record: any) => {
-    return {
-      onClick: () => {
-        onListPoint(record);
-      },
+    // 如果没有ID，使用已有数据展示
+    baseInfo.value = {
+      ...mockDetailInfo,
+      name: values.name || values.p_name,
+      id: values.p_id || values.competitor_p_id || values.id || '-',
+      p_loc: values.p_loc || (values.lng && values.lat ? `${values.lng},${values.lat}` : '-'),
     };
   };
 
-  const rowClassName = (record: any) => {
-    return record.name === activeName.value ? 'active-row' : '';
+  // 更多按钮点击
+  const handleMoreClick = (record: any) => {
+    getPoiBaseInfo(record);
   };
 
-  onMounted(() => {
-    initMap(props.info?.location).then((_map) => {
-      mapInstance = _map;
-      markerInfo = new (window as any).AMap.Marker({
-        zIndex: 999,
-        offset: new (window as any).AMap.Pixel(0, -45),
-      });
-      markerInfo.setMap(_map);
-    });
-  });
-
-  onUnmounted(() => {
-    mapInstance?.destroy();
-  });
-
+  // 监听数据变化
   watch(
     () => props.data,
     (val) => {
-      if (val && mapInstance) {
+      if (val && val.length > 0) {
         const res = val.map((item) => {
-          const fence = JSON.parse(item.pb_boundary);
-          const location = item.p_loc ? item.p_loc.split(',') : [0, 0];
+          const fence = item.pb_boundary ? JSON.parse(item.pb_boundary) : [];
+          const location = item.p_loc ? item.p_loc.split(',').map(Number) : [0, 0];
           return {
+            ...item,
             name: item.p_name,
-            penetration: item.ratio,
+            penetration: item.ratio || item.penetration,
             fence,
             location,
             lng: location[0],
             lat: location[1],
-            ...item,
+            id: item.p_id || item.competitor_p_id,
           };
         });
-        createMassMarks(res);
         list.value = res;
+        if (mapInstance && poiLayerManager) {
+          renderPois(val);
+        }
       }
     },
     { deep: true, immediate: true },
   );
 
+  // 监听位置变化
   watch(
     () => props.info?.location,
     (val) => {
@@ -318,101 +433,4 @@
   );
 </script>
 
-<style lang="less" scoped>
-  @import './index.less';
-
-  .shopping-preferences-styles {
-    position: relative;
-
-    .map-container {
-      width: 100%;
-      height: 100%;
-    }
-
-    .side-panel {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 378px;
-    }
-
-    .work-panel {
-      margin: 10px;
-      padding: 12px;
-      border-radius: 4px;
-      background: #fff;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
-
-      .work-title {
-        margin-bottom: 8px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .name-ellipsis {
-        display: inline-block;
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      :deep(.active-row) {
-        background-color: #e6f7ff;
-      }
-    }
-
-    .more-info-card {
-      margin: 0 10px 10px;
-      padding: 12px;
-      border-radius: 4px;
-      background: #fff;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
-
-      &__header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #f0f0f0;
-      }
-
-      &__title {
-        font-size: 16px;
-        font-weight: 600;
-      }
-
-      .close-btn {
-        color: #999;
-        font-size: 14px;
-        cursor: pointer;
-
-        &:hover {
-          color: #666;
-        }
-      }
-
-      &__body {
-        .info-item {
-          display: flex;
-          margin-bottom: 8px;
-          font-size: 13px;
-          line-height: 1.5;
-        }
-
-        .info-label {
-          min-width: 70px;
-          color: #999;
-        }
-
-        .info-value {
-          flex: 1;
-          color: #333;
-        }
-      }
-    }
-  }
-</style>
+<style lang="less" scoped src="./index.less"></style>

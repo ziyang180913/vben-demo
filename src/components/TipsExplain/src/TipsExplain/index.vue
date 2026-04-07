@@ -9,7 +9,6 @@
       v-model:open="open"
       :z-index="9999"
       wrap-class-name="tips-explain-modal"
-      :get-container="getContainer"
       :mask-closable="false"
       destroy-on-close
       :width="700"
@@ -17,8 +16,8 @@
       @cancel="handleClose"
     >
       <div class="tips-explain-box">
-        <div class="font-16-left-500-pr85 tips-explain-title">数据说明</div>
-        <div class="tips-explain-content" v-html="content" />
+        <div class="tips-explain-box-title">数据说明</div>
+        <div class="tips-explain-content" v-html="content"></div>
         <div class="tips-explain-btn">
           <Button type="primary" @click="handleClose">我知道了</Button>
         </div>
@@ -48,8 +47,6 @@
 
   const open = ref(false);
 
-  const getContainer = () => document.getElementById('app') as HTMLElement;
-
   const handleOpen = () => {
     open.value = true;
   };
@@ -59,4 +56,4 @@
   };
 </script>
 
-<style lang="less" scoped src="./index.less"></style>
+<style lang="less" src="./index.less"></style>

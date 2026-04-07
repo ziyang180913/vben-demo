@@ -4,7 +4,7 @@
       <div class="outer-div__title-box">
         <span v-if="title" class="outer-div__title">{{ title }}</span>
         <span v-if="otherTitle" class="outer-div__subtitle">{{ otherTitle }}</span>
-        <span v-if="tips" class="outer-div__tips">{{ tips }}</span>
+        <component v-if="tips" :is="tips" class="outer-div__tips" />
       </div>
       <div v-if="$slots.rightOperate || rightOperate" class="outer-div__extra">
         <slot name="rightOperate">
@@ -68,7 +68,7 @@
     }
 
     &__tips {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       margin-left: 10px;
     }

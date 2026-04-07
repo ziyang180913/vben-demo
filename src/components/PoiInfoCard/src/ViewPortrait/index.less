@@ -1,6 +1,16 @@
 .view-portrait-modal-content {
+  height: 100%;
+
   .do-modal-feedback-btn {
     right: 110px;
+  }
+
+  .ant-spin-nested-loading {
+    height: calc(100% - 115px);
+
+    :deep(.ant-spin-container) {
+      height: 100%;
+    }
   }
 
   :deep(.view-portrait-radio-group) {

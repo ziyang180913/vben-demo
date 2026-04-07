@@ -8,7 +8,7 @@ const operate = [
     value: 1,
     key: 'number-of-people',
     label: '人群数量统计',
-    componentLoader: () => import('../CustomerBase/index.vue'),
+    componentLoader: () => import('../NumberOfPeople/index.vue'),
   },
   {
     value: 2,
@@ -116,6 +116,7 @@ const attribute = [
 
 /**
  * 客户画像模块配置
+ * value 值用于 ViewPortrait 组件内的 RadioGroup 匹配
  */
 const portrait = [
   {
@@ -131,15 +132,15 @@ const portrait = [
     componentLoader: () => import('../ViewPortrait/index.vue'),
   },
   {
-    value: 4,
-    key: 'transportation',
-    label: '交通方式',
-    componentLoader: () => import('../ViewPortrait/index.vue'),
-  },
-  {
     value: 3,
     key: 'business-preference-detail',
     label: '业态偏好(细)',
+    componentLoader: () => import('../ViewPortrait/index.vue'),
+  },
+  {
+    value: 4,
+    key: 'transportation',
+    label: '交通方式',
     componentLoader: () => import('../ViewPortrait/index.vue'),
   },
   {
@@ -187,66 +188,6 @@ const portrait = [
 ];
 
 /**
- * 精准营销模块配置
- */
-const marketing = [
-  {
-    value: 1,
-    key: 'lost-customer-recovery',
-    label: '流失客挽回',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-  {
-    value: 2,
-    key: 'competitive-marketing',
-    label: '竞品营销',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-  {
-    value: 3,
-    key: 'surrounding-marketing',
-    label: '周边营销',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-  {
-    value: 4,
-    key: 'member-marketing',
-    label: '会员营销',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-];
-
-/**
- * 门店模型模块配置
- */
-const model = [
-  {
-    value: 1,
-    key: 'store-score',
-    label: '门店经营评分',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-  {
-    value: 2,
-    key: 'location-score',
-    label: '店铺位置得分',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-  {
-    value: 3,
-    key: 'site-selection-score',
-    label: '选址打分表',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-  {
-    value: 4,
-    key: 'site-selection-recommend',
-    label: '选址推荐位',
-    componentLoader: () => import('../CustomerBase/index.vue'),
-  },
-];
-
-/**
  * 默认模块配置 - 数据分析卡片系统
  * 包含：指标经营、地理属性、客户画像、精准营销、门店模型 五大模块
  */
@@ -284,31 +225,8 @@ export const defaultModuleConfig: ModuleConfig[] = [
       label: item.label,
       permission: `analysis:portrait:${item.value}`,
       componentLoader: item.componentLoader,
-      modalConfig: { width: 900, title: item.label },
-    })),
-  },
-  {
-    key: 'marketing',
-    title: '精准营销',
-    sort: 4,
-    tags: marketing.map((item) => ({
-      key: item.key,
-      label: item.label,
-      permission: `analysis:marketing:${item.value}`,
-      componentLoader: item.componentLoader,
-      modalConfig: { width: 900, title: item.label },
-    })),
-  },
-  {
-    key: 'model',
-    title: '门店模型',
-    sort: 5,
-    tags: model.map((item) => ({
-      key: item.key,
-      label: item.label,
-      permission: `analysis:model:${item.value}`,
-      componentLoader: item.componentLoader,
-      modalConfig: { width: 900, title: item.label },
+      componentProps: { value: item.value },
+      modalConfig: { width: 900, title: item.label, value: item.value },
     })),
   },
 ];

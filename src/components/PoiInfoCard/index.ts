@@ -14,10 +14,7 @@ export type {
 } from './src/PoiInfoCard/types';
 
 // 导出配置和工具函数
-export {
-  defaultModuleConfig,
-  filterAndSortModules,
-} from './src/PoiInfoCard/config';
+export { defaultModuleConfig, filterAndSortModules } from './src/PoiInfoCard/config';
 
 // 导出组合式函数
 export { usePermission } from './src/PoiInfoCard/usePermission';
@@ -25,3 +22,6 @@ export { useDynamicComponent } from './src/PoiInfoCard/useDynamicComponent';
 
 // 导出子组件
 export { default as DataAnalysisModal } from './src/PoiInfoCard/DataAnalysisModal.vue';
+export { default as PoiDetailModal } from './src/PoiDetailModal/index.vue';
+export { defaultInfoLabels } from './src/PoiDetailModal/config';
+export type { InfoLabelItem, DetailData } from './src/PoiDetailModal/config';

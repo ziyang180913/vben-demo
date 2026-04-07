@@ -96,15 +96,30 @@
         axisLabel: {
           formatter: (value: number) => (formatter ? formatter(value) : value),
         },
+        splitLine: {
+          lineStyle: {
+            type: 'dashed',
+          },
+        },
       },
       series: [
         {
           name: alias,
           type: 'bar',
           barMaxWidth: 30,
-          data: props.data.map((item) => item.value),
-          itemStyle: {
-            borderRadius: [4, 4, 0, 0],
+          data: props.data.map((item, index) => ({
+            value: item.value,
+            itemStyle: {
+              color: props.colors[index % props.colors.length],
+              borderRadius: [4, 4, 0, 0],
+            },
+          })),
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params: any) => {
+              return formatter ? formatter(params.value) : params.value;
+            },
           },
         },
       ],

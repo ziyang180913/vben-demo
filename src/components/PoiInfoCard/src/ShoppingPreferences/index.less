@@ -1,24 +1,220 @@
-.shopping-preferences-styles {
+.shopping-preferences {
   position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 800px;
 
-  .amap-info-sharp {
-    bottom: -6px;
-    left: 50%;
-    border-top: 8px solid #fff;
-    margin-left: -8px;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    &::after {
-      position: absolute;
-      content: '';
-      margin-top: -7px;
-      border-top: 8px solid rgba(0, 0, 0, 0.3);
-      filter: blur(2px);
-      z-index: -1;
+  // 支持 flex 布局占满剩余空间
+  .flex-container &,
+  [flex='1'] &,
+  .flex-1 & {
+    min-height: auto;
+  }
+
+  :deep(.template-map-component) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    // 确保地图容器占满高度
+    .amap-container,
+    .amap-map-container {
+      height: 100% !important;
     }
   }
 
-  .poi-card-info-box{
+  /* 左侧面板基础布局：修改为贴边 */
+  .side-panel {
+    position: absolute;
+    z-index: 100;
     top: 20px;
+    left: 0;
+    width: 400px;
+    height: calc(100% - 40px);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 8px 8px 0;
+    background: #fff;
+    box-shadow: 4px 0 16px rgb(0 0 0 / 8%);
+
+    &.collapsed {
+      transform: translateX(-400px); /* 完全移出 */
+    }
+
+    /* 收起按钮：确保图标随状态旋转 */
+    .collapse-btn {
+      display: flex;
+      position: absolute;
+      top: 50%;
+      right: -24px;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 56px;
+      transform: translateY(-50%);
+      border-radius: 0 8px 8px 0;
+      background: @primary-color;
+      box-shadow: 2px 0 8px rgb(78 106 255 / 30%);
+      color: #fff;
+      cursor: pointer;
+
+      .anticon {
+        transition: transform 0.3s ease;
+      }
+
+      &.is-collapsed .anticon {
+        transform: rotate(180deg); /* 收起时箭头反向 */
+      }
+    }
+  }
+
+  /* 内部列表样式优化 */
+  .panel-content {
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 12px;
+
+    .title {
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
+  // 4. 列表样式细节优化
+  .list-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .list-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-radius: 4px;
+    background: #f8f9fb;
+    color: #8c8c8c;
+    font-size: 13px;
+
+    span {
+      text-align: center;
+    }
+
+    .col-index {
+      width: 50px;
+    }
+
+    .col-name {
+      flex: 1;
+      padding-left: 10px;
+      text-align: left;
+    }
+
+    .col-ratio {
+      width: 85px;
+    }
+
+    .col-action {
+      width: 60px;
+    }
+  }
+
+  .list-body {
+    flex: 1;
+    margin-top: 8px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      background: #e8e8e8;
+    }
+  }
+
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 0;
+    transition: all 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+
+    &:hover {
+      background: #f6f8ff;
+    }
+
+    &.active {
+      background: #eef1ff;
+
+      .col-name {
+        color: @primary-color;
+        font-weight: 600;
+      }
+    }
+
+    .col-index {
+      width: 50px;
+      color: #bfbfbf;
+      text-align: center;
+    }
+
+    .col-name {
+      flex: 1;
+      padding-left: 10px;
+      overflow: hidden;
+      color: #333;
+      font-size: 14px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .col-ratio {
+      width: 85px;
+      color: #595959;
+      text-align: center;
+      font-variant-numeric: tabular-nums; /* 保持数字等宽对齐 */
+    }
+
+    .col-action {
+      width: 60px;
+      text-align: center;
+
+      a {
+        color: @primary-color;
+        font-size: 13px;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  // 加载状态
+  .loading-wrapper {
+    display: flex;
+    position: absolute;
+    z-index: 200;
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: rgb(255 255 255 / 60%);
   }
 }

@@ -73,9 +73,14 @@ export function useDynamicComponent(
   /**
    * 打开标签对应的弹窗
    * @param tag - 标签配置
+   * @param loaderArgs - 传递给 componentLoader 的额外参数
    * @param extraProps - 额外传递给组件的属性
    */
-  const openModal = async (tag: TagItem, extraProps?: Record<string, any>): Promise<void> => {
+  const openModal = async (
+    tag: TagItem,
+    loaderArgs?: any[],
+    extraProps?: Record<string, any>,
+  ): Promise<void> => {
     // 执行打开前的回调
     if (onBeforeOpen) {
       const shouldOpen = await onBeforeOpen(tag);

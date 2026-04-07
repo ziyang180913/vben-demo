@@ -28,9 +28,6 @@
             mode="multiple"
             :options="categoryList"
           />
-          <div style="display: inline-block; margin-top: 5px; color: red">
-            提示：非会员只能查询最近2个月的业态偏好数据，更早数据请联系客户经理。
-          </div>
         </template>
       </div>
       <Button type="primary" @click="onExport">导出</Button>
